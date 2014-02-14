@@ -44,7 +44,7 @@ all: AnonyChatUnitTests
 AnonyChatUnitTests: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/arsenic/networks2workspace/AnonyChatLib/Debug" -o"AnonyChatUnitTests" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"/home/arsenic/AnonyChat/AnonyChatLib/Debug" -Bstatic -o"AnonyChatUnitTests" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

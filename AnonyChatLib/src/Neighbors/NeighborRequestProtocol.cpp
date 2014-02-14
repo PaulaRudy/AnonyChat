@@ -6,14 +6,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include "messagepdu.h"
+#include "neighbor.h"
+
 
 // this is completely arbitrary right now
-#define PORT 9191
-#define NEIGHBORVALUE1 5
-#define NEIGHBORVALUE2 10
-#define NEIGHBORVALUE3 15
-#define UTILBENCHMARK1 80
-#define UTILBENCHMARK2 160
 
 struct NeighborRequestPDU {
 	unsigned opcode;
@@ -23,8 +20,6 @@ struct NeighborRequestPDU {
 	unsigned neighbors;
 	struct in_addr n_addr;
 };
-
-// above should be in header
 
 //CONNECTTOHOST – Connects to a remote host
 bool ConnectToHost(int PortNo, char* IPAddress, int* sockfd)

@@ -5,7 +5,7 @@
  *      Author: Sam Lalezari
  */
 
-#include "Contact.h"
+#include "ContactList.h"
 
 bool Contact::isEmpty(){
 	if(contact_name.empty() && virtual_address == NULL){
@@ -21,6 +21,17 @@ Contact::Contact(unsigned char virtual_add[1024], string name){
 	memcpy(virtual_address, virtual_add, 1024);
 }
 
+
+string Contact::toString(){
+	string return_string;
+
+	return_string.append(contact_name);
+	return_string.append(" | ");
+	return_string.append((char *)virtual_address);
+
+	return return_string;
+}
+
 void printContact(Contact c){
 	cout << c.getName()+ " ";
 	cout << c.getAddr();
@@ -28,18 +39,15 @@ void printContact(Contact c){
 
 
 void ContactList::add(Contact c){
+	contact_list.push_back(c);
 
-	printContact(c);
-	for(int x = 0; x < 1024; x++){
-		Contact temp_contact = contact_list[x];
-		//cout << x << " checking if temp_contact is empty... \n";
-		if(temp_contact.isEmpty()){
-			cout << "temp_contact was empty\n";
-			contact_list[x] = c;
-			printContact(c);
-			return;;
-		}
+}
 
+string ContactList::toString(){
+	string return_string;
+	for(size_t i = 0; i < contact_list.size(); i++){
+		Contact c = contact_list.at(i);
+		return_string.append(c.toString() + "\n");
 	}
-
+	return return_string;
 }

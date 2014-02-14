@@ -77,7 +77,7 @@ int invite_neighbor(char *ipaddr, int sockfd) {
 
 	recbytes = recv(sockfd, (char *)&newNeighbor, sizeof(struct NeighborRequestPDU), 0);
 
-	AddToNeighbors(newNeighbor);
+	EvaluateNeighborRequest(newNeighbor);
 
 	return 0; // for success
 }
@@ -131,7 +131,7 @@ int broadcastNeighborRequest() {
 
 */
 
-bool AddToNeighbors(struct NeighborRequestPDU newNeighbor) {
+bool EvaluateNeighborRequest(struct NeighborRequestPDU newNeighbor) {
 	if (newNeighbor.neighbors < UserTrustLevel)
 		return false;
 

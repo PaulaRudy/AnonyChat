@@ -5,7 +5,7 @@
  *      Author: Paula Rudy (paular@wpi.edu)
  */
 #include "../include/Connection.h"
-
+#include <stdlib.h>
 
 //Grab the address stored in the sockaddr pointed to by sa, IPv4 *or* IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -26,6 +26,8 @@ void *get_in_addr(struct sockaddr *sa)
  */
 bool ConnectToHost(int portNo, char* IPAddress, int* sockfd ){
 
+	char *port;
+	sprintf(port,"%d", portNo);
 
 	struct addrinfo prepInfo;//Used to store information on the criteria for selecting the socket address structures returned in the listOfServerAddr.
 	struct addrinfo *listOfServerSocketAddr;//The list of appropriate socket address structures available
@@ -38,7 +40,7 @@ bool ConnectToHost(int portNo, char* IPAddress, int* sockfd ){
 	prepInfo.ai_socktype = SOCK_STREAM;//only use TCP
 
 	//Set up the list of appropriate socket address structures available
-	if ((returnValueFromgetaddrinfo = getaddrinfo(IPAddress, portNo, &prepInfo, &listOfServerSocketAddr)) != 0) {//If it fails...
+	if ((returnValueFromgetaddrinfo = getaddrinfo(IPAddress, port, &prepInfo, &listOfServerSocketAddr)) != 0) {//If it fails...
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValueFromgetaddrinfo));
 		return false;
 	}

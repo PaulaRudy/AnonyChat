@@ -13,9 +13,8 @@ int contactListTest(){
 
 	ContactList list;
 
-	unsigned char addr[1024];
-	memcpy(addr, (int []){0x61}, sizeof addr);
-	Contact c = Contact(addr, "Scooby");
+
+	Contact c = Contact(0, "Scooby");
 
 	list.add(c);
 	list.add(c);

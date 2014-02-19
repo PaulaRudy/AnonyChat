@@ -13,21 +13,36 @@ Connection::Connection(int portNoSendToSet, int portNoRecieveToSet,
 	portNoReceive = portNoRecieveToSet;
 	portNoSend = portNoSendToSet;
 	IPAddress = IPAddressToSet;
+	openBool = false;
+	openBoolReceive = false;
+	openBoolSend = false;
+	flagToReceiveThread = false;
 	openConnection();
+	checkState();
 }
 
 Connection::Connection(int portNoSendToSet, char* IPAddressToSet) {
 	portNoSend = portNoSendToSet;
 	portNoReceive = (portNoSendToSet + 1);
 	IPAddress = IPAddressToSet;
+	openBool = false;
+	openBoolReceive = false;
+	openBoolSend = false;
+	flagToReceiveThread = false;
 	openConnection();
+	checkState();
 }
 
 Connection::Connection(char* IPAddressToSet) {
 	portNoSend = 2020;
 	portNoReceive = 2020;
 	IPAddress = IPAddressToSet;
+	openBool = false;
+	openBoolReceive = false;
+	openBoolSend = false;
+	flagToReceiveThread = false;
 	openConnection();
+	checkState();
 }
 
 int Connection::openConnection() {
@@ -87,8 +102,8 @@ int Connection::openSend() {
 
 		//Loop through all the results in listOfServerSocketAddr, create a socket and connect to the first address we can
 		for (iteratorForListOfServerSocketAddr = listOfServerSocketAddr; iteratorForListOfServerSocketAddr
-		!= NULL; iteratorForListOfServerSocketAddr
-		= iteratorForListOfServerSocketAddr->ai_next) {
+				!= NULL; iteratorForListOfServerSocketAddr
+				= iteratorForListOfServerSocketAddr->ai_next) {
 
 			//Try to create the socket
 			if ((sockfdSend = socket(
@@ -118,16 +133,15 @@ int Connection::openSend() {
 
 		freeaddrinfo(listOfServerSocketAddr);//We're all done with this structure, so free the memory
 
+		openBoolSend = true;
+
 		return 0;
 	}
 
 }
 
-
 int Connection::openReceive() {
-	if (isOpen()) {
-		return 0;
-	} else {
+	if (!(isOpen())) {
 		char *port;
 		sprintf(port, "%d", (portNoReceive + 1));
 
@@ -156,8 +170,8 @@ int Connection::openReceive() {
 
 		//Loop through all the results in listOfServerSocketAddr, create a socket and connect to the first address we can
 		for (iteratorForListOfServerSocketAddr = listOfServerSocketAddr; iteratorForListOfServerSocketAddr
-		!= NULL; iteratorForListOfServerSocketAddr
-		= iteratorForListOfServerSocketAddr->ai_next) {
+				!= NULL; iteratorForListOfServerSocketAddr
+				= iteratorForListOfServerSocketAddr->ai_next) {
 
 			//Try to create the socket
 			if ((frontDoor = socket(
@@ -212,67 +226,120 @@ int Connection::openReceive() {
 		}
 
 		//Print a message to the console indicating a successful set up
-		printf("Connection::openReceive(): now waiting for connections...\n  \n"); //TODO: remove this debug code
-
-		// Main loop used to accept incoming connections
-		while (1) {
-
-			//Open a new socket ("sockfdReceive") for the first connection request on the listen queue
-			sin_size = sizeof clientAddress;
-			sockfdReceive = accept(frontDoor,
-					(struct sockaddr *) &clientAddress, &sin_size);
-			if (sockfdReceive == -1) {//If failure accept()ing:
-				perror("Connection::openReceive(): accept()");
-				close(frontDoor);
-				close(sockfdReceive);
-				return 1;
-			}
-
-			//Find and store the calling client's IP address to a string
-			inet_ntop(clientAddress.ss_family,
-					getAddrFromSockaddr((struct sockaddr *) &clientAddress),
-					clientAddressString, sizeof clientAddressString);//TODO: remove this debug code
-
-			//Print a message to the console to indicate a connection has been received
-			printf("Connection::openReceive(): got connection from %s\n", clientAddressString);//TODO: remove this debug code
-
-			//Fork off a new process to handle the newly accepted connection
-			if (!fork()) {//TODO: modify for threads
-
-				close(frontDoor); //The child process doesn't need the listener
+		printf(
+				"Connection::openReceive(): now waiting for connections...\n  \n"); //TODO: remove this debug code
 
 
-				//TODO: put this in closeReceive
-				//				close(sockfdReceive);//This child process is done, so we don't need this anymore
-				//				exit(0);//Close this child process
-			}
-
+		//Open a new socket ("sockfdReceive") for the first connection request on the listen queue
+		sin_size = sizeof clientAddress;
+		sockfdReceive = accept(frontDoor, (struct sockaddr *) &clientAddress,
+				&sin_size);
+		if (sockfdReceive == -1) {//If failure accept()ing:
+			perror("Connection::openReceive(): accept()");
+			close(frontDoor);
+			close(sockfdReceive);
+			return 1;
 		}
 
+		//Find and store the calling client's IP address to a string
+		inet_ntop(clientAddress.ss_family,
+				getAddrFromSockaddr((struct sockaddr *) &clientAddress),
+				clientAddressString, sizeof clientAddressString);//TODO: remove this debug code
+
+		//Print a message to the console to indicate a connection has been received
+		printf("Connection::openReceive(): got connection from %s\n",
+				clientAddressString);//TODO: remove this debug code
+
+		close(frontDoor); //Done with this
+
+		openBoolReceive = true;
+
+		//Fork off a new process to handle the newly accepted connection
+		receiveThread = std::thread(receiveThreadFunction, &flagToReceiveThread, sockfdReceive, &flagToReceiveThreadMutex, &mutexForBufferFile, IPAddress);
+
 	}
+	return 0;
+}
+
+void receiveThreadFunction(bool *flagToReceiveThread, int sockfdReceive,
+		std::mutex *flagToReceiveThreadMutex, std::mutex *mutexForBufferFile,
+		char* IPAddress) {
+
+	(*flagToReceiveThreadMutex).lock();
+
+	std::ofstream bufferFileStream;
+
+	while (!(*flagToReceiveThread)) {
+		(*flagToReceiveThreadMutex).unlock();
+
+		int numBytesRecieved;
+		char buffer[999999];
+
+		//Try to pull no more than MAXDATASIZE-1 bytes through the socket into the buffer to grab the client's reply
+		if ((numBytesRecieved = recv(sockfdReceive, buffer, 999999, 0)) == -1) {//If it fails...//TODO: put real value as max data size
+			perror("receiveThreadFunction: recv()");
+			close(sockfdReceive);//This child process is done, so we don't need this anymore
+			exit(1);
+		}
+
+		(*mutexForBufferFile).lock();
+		bufferFileStream.open(IPAddress, std::ios::out | std::ios::app);
+
+		bufferFileStream << std::string(buffer, (size_t) numBytesRecieved)
+				<< std::endl;
+
+		bufferFileStream.close();
+
+		(*mutexForBufferFile).unlock();
+
+	}
+
+	close(sockfdReceive);//This child process is done, so we don't need this anymore
+	exit(0);
+
 }
 
 //TODO: modify for threads
 int Connection::closeSend() {
-	if (isOpen()) {
+	if (openBoolSend) {
 		close(sockfdSend);
 	}
 	return 0;
 }
 
-//TODO: modify for threads
 int Connection::closeReceive() {
-	if (isOpen()) {
-		close(sockfdReceive);
+	if (openBoolReceive) {
+
+		flagToReceiveThreadMutex.lock();
+		flagToReceiveThread = true;
+		flagToReceiveThreadMutex.unlock();
+		receiveThread.join();
+		openBoolReceive = false;
+		openBool = false;
+
 	}
 	return 0;
 }
 
+//used to update openBool
+void Connection::checkState() {
+	if (openBoolSend && openBoolReceive)
+		openBool = true;
+	else
+		openBool = false;
+}
+
+
 // TODO: Finish these
+
 //int Connection::send(Message toSend) {
+//	if (!openBoolSend){
+//		perror("Connection::send: send socket not connected!");
+//		return 1;
+//	}
 //
 //}
-//
+
 //Message Connection::receive() {
 //
 //}

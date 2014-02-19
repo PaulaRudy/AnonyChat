@@ -22,6 +22,10 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <time.h>
+#include <thread>
+#include <iostream>
+#include <fstream>
+#include <mutex>
 #include "message.h"
 
 
@@ -32,12 +36,20 @@ private:
 	char* IPAddress;//The IP address of the connection
 	int sockfdReceive;//The socket descriptor of the Receive connection
 	int sockfdSend;//The socket descriptor of the Send connection
-	bool openBool;//Whether the connections are open or not
+	bool openBool;//Whether both the receive and send connections are open (true) or closed (false)
+	bool openBoolReceive;//Whether the receive connection is open or not
+	bool openBoolSend;//Whether the send connection is open or not
+	bool flagToReceiveThread;//Used to signal to receive thread that it should stop and join();
+	std::mutex flagToReceiveThreadMutex;//Mutex lock for flagToReceiveThread
+	std::mutex mutexForBufferFile;//Mutex lock for the file used to buffer messages received through this connection
 	struct sigaction sa;//Used to reap dead processes
+	std::thread receiveThread;
 	int openSend();
 	int closeSend();
 	int openReceive();
 	int closeReceive();
+	void checkState();//used to update openBool
+
 
 public:
 	Connection(int portNoSendToSet, int portNoRecieveToSet, char* IPAddressToSet);
@@ -55,6 +67,8 @@ public:
 	Message receive();
 
 };
+
+void receiveThreadFunction(bool *flagToReceiveThread,int sockfdReceive, std::mutex *flagToReceiveThreadMutex, std::mutex *mutexForBufferFile, char* IPAddress);
 
 //Helper function: grabs the address stored in the sockaddr pointed to by sa, IPv4 *or* IPv6
 void *getAddrFromSockaddr(struct sockaddr *sa)

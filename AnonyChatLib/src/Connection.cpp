@@ -8,6 +8,35 @@
  */
 #include "../include/Connection.h"
 
+/**
+ * This constructor creates and opens a new Connection.
+ * The send and receive TCP connections are open separately
+ * through the port numbers passed in as portNoSendToSet and
+ * portNoRecieveToSet respectively. Both the send and receive
+ * connections are made to the IP address passed in as
+ * portNoSendToSet.
+ * See Connection::openConnection(), Connection::openSend(),
+ * and Connection::openReceive() for more details
+ *
+ * IMPORTANT NOTES:
+ *
+ * -> The receive connection will be opened by
+ * listening on port number (portNoRecieveToSet + 1) for
+ * incoming connection requests, but the finished receive
+ * TCP connection will be through the port number passed in
+ * as portNoSendToSet.
+ * See Connection::openReceive() defined in this file for
+ * more details.
+ *
+ * ->Opening the receive connection also spawns a thread to
+ * buffer all incoming messages to a file (of the filename
+ * = the IP address of the connection).
+ * See Connection::openReceive() and receiveThreadFunction()
+ * defined in this file for more details.
+ *
+ * See Connection::openConnection(), Connection::openSend(),
+ * and Connection::openReceive() for more details
+ */
 Connection::Connection(int portNoSendToSet, int portNoRecieveToSet,
 		char* IPAddressToSet) {
 	portNoReceive = portNoRecieveToSet;
@@ -21,6 +50,15 @@ Connection::Connection(int portNoSendToSet, int portNoRecieveToSet,
 	checkState();
 }
 
+/**
+ * This constructor creates and opens a new Connection.
+ * The details of the execution are the same as
+ * Connection::Connection(int portNoSendToSet, int portNoRecieveToSet, char* IPAddressToSet)
+ * as defined in this file, except portNoReceive is set to (portNoSendToSet +1).
+ *
+ * See Connection::Connection(int portNoSendToSet, int portNoRecieveToSet, char* IPAddressToSet)
+ * as defined in this file for more detail.
+ */
 Connection::Connection(int portNoSendToSet, char* IPAddressToSet) {
 	portNoSend = portNoSendToSet;
 	portNoReceive = (portNoSendToSet + 1);
@@ -33,54 +71,96 @@ Connection::Connection(int portNoSendToSet, char* IPAddressToSet) {
 	checkState();
 }
 
-Connection::Connection(char* IPAddressToSet) {
-	portNoSend = 2020;
-	portNoReceive = 2020;
-	IPAddress = IPAddressToSet;
-	openBool = false;
-	openBoolReceive = false;
-	openBoolSend = false;
-	flagToReceiveThread = false;
-	openConnection();
-	checkState();
-}
-
+/**
+ * This function opens both the send and receive
+ * TCP connections for this Connection.
+ * See  Connection::openSend(), and Connection::openReceive()
+ * as defined in this file for more details.
+ * This function will return 0 if both send and receive connections
+ * are open, or 1 if either the send or receive connection
+ * encounters an error during the opening process.
+ *
+ * IMPORTANT NOTES:
+ *
+ * -> The receive connection will be opened by
+ * listening on port number (portNoReceive + 1) for
+ * incoming connection requests, but the finished receive
+ * TCP connection will be through the port number passed in
+ * as portNoReceive.
+ * See Connection::openReceive() defined in this file for
+ * more details.
+ *
+ * ->Opening the receive connection also spawns a thread to
+ * buffer all incoming messages to a file (of the filename
+ * = the IP address of the connection).
+ * See Connection::openReceive() and receiveThreadFunction()
+ * defined in this file for more details.
+ *
+ */
 int Connection::openConnection() {
-	if (isOpen()) {
-		return 0;
-	} else {
-		int rvReceive = openReceive(); //openRecieve must be first to accept incoming connections
-		int rvSend = openSend();
+	if (!(isOpen())) {//Only if we are not fully connected should we try to open any new connections.
 
-		if ((rvSend == 1) || (rvReceive == 1))
+		if (!openBoolReceive)//Only if the receive TCP connection is not open should we attempt to open it
+			int rvReceive = openReceive(); //Open the receive TCP connection. openReceive must be called first to accept incoming connections.
+
+		if (!openBoolSend)//Only if the send TCP connection is not open should we attempt to open it
+			int rvSend = openSend();//Open the send TCP connection.
+
+		if ((rvSend == 1) || (rvReceive == 1))//If either the call to openReceive() or openSend() ends with errors (indicated by a return value of 1)...
 			return 1;
 		else
 			return 0;
 	}
+	return 0;
 }
 
+/**
+ * This function closes both the send and receive
+ * TCP connections for this Connection.
+ * See  Connection::closeSend(), and Connection::ocloseReceive()
+ * as defined in this file for more details.
+ * This function will return 0 if both send and receive connections
+ * are closed successfully, or 1 if either the send or receive connection
+ * encounters an error during the closing process.
+ *
+ * IMPORTANT NOTES:
+ *
+ * ->The receive connection has a thread to
+ * buffer all incoming messages to a file (of the filename
+ * = the IP address of the connection), so it must wait for
+ * the receive thread to exit gracefully.
+ * See Connection::closeReceive() and receiveThreadFunction()
+ * defined in this file for more details.
+ *
+ */
 int Connection::closeConnection() {
-	if (!(isOpen())) {
-		return 0;
-	} else {
-		int rvSend = closeSend();
+
+	if (openBoolReceive)//Only if the receive connection is currently open should we attempt to close it
 		int rvReceive = closeReceive();
+	if (openBoolSend)//Only if the send connection is currently open should we attempt to close it
+		int rvSend = closeSend();
 
-		if ((rvSend == 1) || (rvReceive == 1))
-			return 1;
-		else
-			return 0;
-	}
+	if ((rvSend == 1) || (rvReceive == 1))//If either of the calls to close a connection return with errors....
+		return 1;
 
+	openBool = false;//Set the openBool to indicate a successful closure
+	return 0;
 }
 
-//TODO: modify for threads
+/**
+ * Opens (creates and connects) the send tcp socket for this Connection if it isn't already open.
+ * The connection opened is a TCP socket made to the IP address stored in the calling Connection's IPAddress variable.
+ * The connection is made via the port number stored in the calling Connection's portNoSend variable.
+ * Returns 1 if it encounters an error (it will print an error message to stderr if this happens),
+ * 0 if everything works.
+ */
 int Connection::openSend() {
-	if (isOpen()) {
-		return 0;
-	} else {
-		char *port;
-		sprintf(port, "%d", portNoSend);
+
+	//Only if the send connection isn't open should you try to create and connect the send socket
+	if (!openBoolSend) {
+
+		char *port;//This will hold the port number to open the send connection from (set from the connection's portNoSend variable)
+		sprintf(port, "%d", portNoSend); //This is a work around to allow a dynamic port number. This sets port to the value in the connection's portNoSend variable.
 
 		struct addrinfo prepInfo;//Used to store information on the criteria for selecting the socket address structures returned in the listOfServerAddr.
 		struct addrinfo *listOfServerSocketAddr;//The list of appropriate socket address structures available
@@ -122,8 +202,7 @@ int Connection::openSend() {
 				continue;
 			}
 
-			//Connection successful
-			break;
+			break;//Connection was successful, so we don't have to try another address
 		}
 
 		if (iteratorForListOfServerSocketAddr == NULL) {//If we have iterated over the list of addrinfo ("listOfServerSocketAddr") and failed to successfully connect to any of the addresses...
@@ -132,18 +211,28 @@ int Connection::openSend() {
 		}
 
 		freeaddrinfo(listOfServerSocketAddr);//We're all done with this structure, so free the memory
-
-		openBoolSend = true;
-
-		return 0;
 	}
 
+	openBoolSend = true;//Set the openBoolSend variable to indicate the send connection is now open
+	return 0;
 }
 
+/**
+ * Opens (creates and connects) the receive tcp socket for this Connection if it isn't already open.
+ * The connection opened is a TCP socket made to the IP address stored in the calling Connection's IPAddress variable.
+ * The connection is made via listening on 1+ the port number stored in the calling Connection's portNoReceive variable.
+ * The accepted incoming connection will be a TCP socket opened on the port number stored in the calling Connection's
+ * portNoReceive variable.
+ * A thread is spawned to handle all incoming messages- messages will be written to a file with the filename of the
+ * IP address it is connected to.
+ * Returns 1 if it encounters an error (it will print an error message to stderr if this happens),
+ * 0 if everything works.
+ */
 int Connection::openReceive() {
-	if (!(isOpen())) {
-		char *port;
-		sprintf(port, "%d", (portNoReceive + 1));
+	//Only if the receive connection isn't open should you try to create and connect the receive socket
+	if (!openBoolReceive) {
+		char *port;//This will hold the port number to listen to incoming connection requests from (set from the connection's portNoReceive variable + 1)
+		sprintf(port, "%d", (portNoReceive + 1)); //This is a work around to allow a dynamic port number. This sets port to the value in the connection's portNoReceive variable + 1.
 
 		struct addrinfo prepInfo;//Used to store information on the criteria for selecting the socket address structures returned in the listOfServerAddr.
 		struct addrinfo *listOfServerSocketAddr;//The list of appropriate socket address structures available
@@ -186,7 +275,7 @@ int Connection::openReceive() {
 			if (setsockopt(frontDoor, SOL_SOCKET, SO_REUSEADDR, &yes,
 					sizeof(int)) == -1) {//If it fails...
 				perror("Connection::openReceive(): setsockopt()");
-				exit(1);
+				continue;
 			}
 
 			//Try to bind the socket (assign the address contained in the addrinfo structure pointed to by iteratorForListOfServerSocketAddr to the socket)
@@ -252,45 +341,60 @@ int Connection::openReceive() {
 
 		close(frontDoor); //Done with this
 
-		openBoolReceive = true;
-
 		//Fork off a new process to handle the newly accepted connection
-		receiveThread = std::thread(receiveThreadFunction, &flagToReceiveThread, sockfdReceive, &flagToReceiveThreadMutex, &mutexForBufferFile, IPAddress);
+		receiveThread = std::thread(receiveThreadFunction,
+				&flagToReceiveThread, sockfdReceive, &flagToReceiveThreadMutex,
+				&mutexForBufferFile, IPAddress);
 
 	}
+
+	openBoolReceive = true;//Indicate the connection is now open
 	return 0;
 }
 
+/**
+ * This is the code executed by the thread spawned to handle all incoming messages
+ * on the Connection's receive connection.
+ * The thread (stored in the Connection's receiveThread variable) tries to pull as much data
+ * through the socket passed in as sockfdReceive to fill a maximum size message
+ * (see message.h). When it has received as much data as it can (up to max message size),
+ * it appends that data to the end of a file with the filename of the IP address of the connection
+ * (passed in as IPAddress). Before each new message is received, it checks to see if it should
+ * end by checking the flagToReceiveThread boolean. This ensures that it is not suspended
+ * in the middle of a function call. When the flagToReceiveThread boolean is seen to =
+ * true, it closes the socket and exits.
+ * The thread will print a message to stderr, close the socket, and exit with value 1 if it
+ * encounters an error with the recv() function.
+ */
 void receiveThreadFunction(bool *flagToReceiveThread, int sockfdReceive,
 		std::mutex *flagToReceiveThreadMutex, std::mutex *mutexForBufferFile,
 		char* IPAddress) {
 
-	(*flagToReceiveThreadMutex).lock();
-
 	std::ofstream bufferFileStream;
+	(*flagToReceiveThreadMutex).lock();//Make sure to lock the flagToReceiveThreadMutex to ensure we see the right value
 
-	while (!(*flagToReceiveThread)) {
-		(*flagToReceiveThreadMutex).unlock();
+	while (!(*flagToReceiveThread)) {//Check the flagToReceiveThread boolean to see if we should clean up and exit
+		(*flagToReceiveThreadMutex).unlock();//Unlock the flagToReceiveThreadMutex to allow others to use it
 
-		int numBytesRecieved;
-		char buffer[999999];
+		int numBytesRecieved;//This will hold the number of bytes successfully received through the socket (up to the maximum message size in bytes)
+		char buffer[999999];//This is a buffer to hold the incoming message//TODO: put real value as max data size
 
-		//Try to pull no more than MAXDATASIZE-1 bytes through the socket into the buffer to grab the client's reply
+		//Try to pull no more than the maximum message size in bytes through the socket into the buffer to grab the message
 		if ((numBytesRecieved = recv(sockfdReceive, buffer, 999999, 0)) == -1) {//If it fails...//TODO: put real value as max data size
 			perror("receiveThreadFunction: recv()");
 			close(sockfdReceive);//This child process is done, so we don't need this anymore
 			exit(1);
 		}
 
-		(*mutexForBufferFile).lock();
-		bufferFileStream.open(IPAddress, std::ios::out | std::ios::app);
+		(*mutexForBufferFile).lock();//Make sure to lock the mutexForBufferFile so others can't read it while we're writing to it
+		bufferFileStream.open(IPAddress, std::ios::out | std::ios::app);//Open the file with the filename = IPAddress (the IP address of the connection). If it does not exist yet, create it.
 
 		bufferFileStream << std::string(buffer, (size_t) numBytesRecieved)
-				<< std::endl;
+				<< std::endl;//Write the received message to the file
 
-		bufferFileStream.close();
+		bufferFileStream.close(); //Close the file so others can use it
 
-		(*mutexForBufferFile).unlock();
+		(*mutexForBufferFile).unlock();//Unlock the mutexForBufferFile so that others know the file is availible
 
 	}
 
@@ -299,7 +403,7 @@ void receiveThreadFunction(bool *flagToReceiveThread, int sockfdReceive,
 
 }
 
-//TODO: modify for threads
+//TODO: modify for threads?
 int Connection::closeSend() {
 	if (openBoolSend) {
 		close(sockfdSend);
@@ -307,28 +411,36 @@ int Connection::closeSend() {
 	return 0;
 }
 
+/**
+ * This closes the Receive TCP connection by signaling the receive thread
+ * to stop by setting the flagToReceiveThread variable to true.
+ */
 int Connection::closeReceive() {
-	if (openBoolReceive) {
-
-		flagToReceiveThreadMutex.lock();
-		flagToReceiveThread = true;
-		flagToReceiveThreadMutex.unlock();
-		receiveThread.join();
-		openBoolReceive = false;
-		openBool = false;
-
+	if (openBoolReceive) { //No need to try to close the receive connection if it's not open
+		flagToReceiveThreadMutex.lock();//Make sure to lock the flagToReceiveThreadMutex to ensure others will see our changes to flagToReceiveThread
+		flagToReceiveThread = true;//Set the flagToReceiveThread boolean to tell the receive thread to clean up and stop execution
+		flagToReceiveThreadMutex.unlock();//Unlock the flagToReceiveThreadMutex so others can view the new value of the flagToReceiveThread boolean
+		receiveThread.join();//Wait for the receiveThread to finish cleaning up and stop execution
+		openBoolReceive = false; //Indicate the receive connection has been closed
+		openBool = false;//Indicate the Connection is no longer fully open
 	}
 	return 0;
 }
 
-//used to update openBool
+/**
+ * This function is used to update the value of the openBool variable.
+ * It checks the values of openBoolSend and openBoolReceive,
+ * and sets openBool to true only if both the send and receive connections
+ * are open (indicated by openBoolSend & openBoolReceive both being 'true').
+ * openBool is set to false if either the send and receive connections are
+ * closed (indicated by openBoolSend or openBoolReceive being 'false').
+ */
 void Connection::checkState() {
 	if (openBoolSend && openBoolReceive)
 		openBool = true;
 	else
 		openBool = false;
 }
-
 
 // TODO: Finish these
 

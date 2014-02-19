@@ -15,7 +15,7 @@ private:
 	unsigned char sourceVID[constants::VID_SIZE];
 	unsigned char destVID[constants::VID_SIZE];
 	char message[constants::MAX_MESSAGE_SIZE];
-	int utilityCounter = 0;
+	int utilityCounter;
 public:
 	Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE], char m[constants::MAX_MESSAGE_SIZE]);
 };

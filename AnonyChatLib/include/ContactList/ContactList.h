@@ -39,8 +39,6 @@ public:
 	string toString();
 };
 
-Contact newContact(unsigned char virtual_add[1024], string name);
-
 void printContact(Contact c);
 
 

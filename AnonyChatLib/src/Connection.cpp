@@ -1,6 +1,13 @@
 /*
  * Connection.cpp
  *
+ * Class used to create, mantain, and use a TCP connection to
+ * a neighbor. Two separate TCP connections are maintained:
+ * one devoted to sending messages, one devoted to receiving.
+ * The receiving TCP connection is managed by a thread that
+ * buffers all input to a file named by the IP address of the
+ * connection.
+ *
  *	Note: Currently waiting on issue #41, issue #42
  *
  *  Created on: Feb 15, 2014

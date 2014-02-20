@@ -39,6 +39,7 @@ private:
 	vector<Contact> contact_list;
 public:
 	void add(Contact c);
+	void remove(string contactName);
 	vector<Contact> getList(){return contact_list;};
 	string toString();
 };

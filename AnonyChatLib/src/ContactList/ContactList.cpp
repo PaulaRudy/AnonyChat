@@ -48,8 +48,14 @@ void printContact(Contact c){
 
 /**
  * Adds a contact to the contact list
+ * Checks to make sure that there are no other contacts with the same name in the list.
  */
 void ContactList::add(Contact c){
+	for(Contact contact:contact_list){
+		if(contact.getName().compare(c.getName())){
+			return;
+		}
+	}
 	contact_list.push_back(c);
 
 }
@@ -64,4 +70,12 @@ string ContactList::toString(){
 		return_string.append(c.toString() + "\n");
 	}
 	return return_string;
+}
+
+void ContactList::remove(string contactName){
+	for(Contact c : contact_list){
+		if(c.getName().compare(contactName) == 0){
+
+		}
+	}
 }

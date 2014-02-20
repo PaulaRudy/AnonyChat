@@ -45,6 +45,21 @@ void AddToNeighbors(std::string newNeighborIP) {
 }
 
 
+int RemoveNeighbor(std::string NeighborIP) {
+	// attempt to find the specified neighborIP in our neighbor list
+	auto result = find(NeighborList.begin(), NeighborList.end(), NeighborIP);
+
+	// if we did find it,
+	if (result != NeighborList.end()) {
+		NeighborList.erase(result);
+		return 0;
+	// otherwise if not
+	} else {
+		return -1;
+	}
+}
+
+
 int NumberOfNeighbors() {
 	return NeighborList.size();
 }

@@ -23,7 +23,7 @@ private:
 	string sourceName;
 	unsigned char sourceVID[constants::VID_SIZE];
 	char message[constants::MAX_MESSAGE_SIZE];
-	int entryIndex = -1;
+	int entryIndex;
 public:
 	HistoryEntry(string sourceName, char message[constants::MAX_MESSAGE_SIZE]);
 	HistoryEntry(unsigned char sourceVID[constants::VID_SIZE], char message[constants::MAX_MESSAGE_SIZE]);
@@ -32,7 +32,7 @@ public:
 	char* getMessage(){return message;};
 	string getSourceName(){return sourceName;};
 	int setEntryIndex(int i){entryIndex = i; return entryIndex;};
-	void setSourceVID(unsigned char source[constants::VID_SIZE]){sourceVID = source;};
+	void setSourceVID(unsigned char source[constants::VID_SIZE]){memcpy(sourceVID, source, constants::VID_SIZE);};
 };
 
 class HistoryLog{
@@ -42,6 +42,7 @@ private:
 	unsigned char sourceVID[constants::VID_SIZE];
 public:
 	HistoryLog(string name, unsigned char VID[constants::VID_SIZE]);
+	HistoryLog(){};
 	string getSourceName(){return sourceName;};
 	vector<HistoryEntry> getLog(){return log;};
 	HistoryEntry getEntry(int i){return log.at(i);};

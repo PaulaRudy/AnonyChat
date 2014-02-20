@@ -12,6 +12,7 @@
 #include <string>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include "../chatHistory.h"
 
@@ -25,7 +26,6 @@ private:
 	HistoryLog chatLog;
 public:
 	Contact(unsigned char va[1024], string name);
-	Contact(){};
 	bool isEmpty();
 	string getName(){return contact_name;};
 	unsigned char* getAddr(){return virtual_address;};
@@ -42,6 +42,7 @@ public:
 	void remove(string contactName);
 	vector<Contact> getList(){return contact_list;};
 	string toString();
+	void write(ofstream& s);
 };
 
 void printContact(Contact c);

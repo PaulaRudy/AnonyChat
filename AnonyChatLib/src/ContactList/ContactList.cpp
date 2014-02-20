@@ -5,7 +5,7 @@
  *      Author: Sam Lalezari
  */
 
-#include "ContactList.h"
+#include "../include/ContactList/ContactList.h"
 
 /**
  * Cheks to see if the contact is empty, if it is return true, otherwise return false
@@ -24,6 +24,7 @@ bool Contact::isEmpty(){
 Contact::Contact(unsigned char virtual_add[1024], string name){
 	contact_name = name;
 	memcpy(virtual_address, virtual_add, 1024);
+	chatLog = HistoryLog(name, virtual_add);
 }
 
 /*
@@ -51,7 +52,8 @@ void printContact(Contact c){
  * Checks to make sure that there are no other contacts with the same name in the list.
  */
 void ContactList::add(Contact c){
-	for(Contact contact:contact_list){
+	for(unsigned int i = 0; i < contact_list.size(); i++){
+		Contact contact = contact_list.at(i);
 		if(contact.getName().compare(c.getName())){
 			return;
 		}
@@ -72,10 +74,26 @@ string ContactList::toString(){
 	return return_string;
 }
 
+/**
+ * Removes the contact from the contact list based on the given contact name.
+ */
 void ContactList::remove(string contactName){
-	for(Contact c : contact_list){
+	for(unsigned int i = 0; i < contact_list.size(); i++){
+		Contact c = contact_list.at(i);
 		if(c.getName().compare(contactName) == 0){
 
 		}
 	}
 }
+
+void ContactList::write(ofstream& s){
+	for(unsigned int i = 0; i < contact_list.size(); i++){
+		Contact c = contact_list.at(i);
+		s.write(c.getName().c_str(), sizeof(c.getName().c_str()));
+		s.write("\n", sizeof("\n"));
+		s.write((const char*)&c.getAddr()[0], constants::VID_SIZE);
+		s.write("\n\n", sizeof("\n\n"));
+	}
+}
+
+

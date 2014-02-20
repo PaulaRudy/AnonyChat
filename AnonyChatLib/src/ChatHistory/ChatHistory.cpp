@@ -14,7 +14,7 @@
  */
 HistoryEntry::HistoryEntry(string source, char m[constants::MAX_MESSAGE_SIZE]){
 	sourceName = source;
-	message = m;
+	memcpy(message, m, constants::MAX_MESSAGE_SIZE);
 }
 
 /**
@@ -23,8 +23,9 @@ HistoryEntry::HistoryEntry(string source, char m[constants::MAX_MESSAGE_SIZE]){
  * @param m The message to add to the history entry.
  */
 HistoryEntry::HistoryEntry(unsigned char source[constants::VID_SIZE], char m[constants::MAX_MESSAGE_SIZE]){
-	sourceVID = source;
-	message = m;
+	memcpy(sourceVID, source, constants::VID_SIZE);
+	memcpy(message, m, constants::MAX_MESSAGE_SIZE);
+
 }
 
 /**
@@ -34,7 +35,7 @@ HistoryEntry::HistoryEntry(unsigned char source[constants::VID_SIZE], char m[con
  */
 HistoryLog::HistoryLog(string name, unsigned char VID[constants::VID_SIZE]){
 	sourceName = name;
-	sourceVID = VID;
+	memcpy(sourceVID, VID, constants::VID_SIZE);
 }
 
 /**

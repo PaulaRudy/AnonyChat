@@ -19,6 +19,7 @@ private:
 	bool broadcastFlag;
 	time_t sendTime;
 	char message[constants::MAX_MESSAGE_SIZE];
+
 public:
 	Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE], bool flag, char m[constants::MAX_MESSAGE_SIZE]);
 };

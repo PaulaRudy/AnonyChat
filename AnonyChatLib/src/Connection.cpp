@@ -1,7 +1,7 @@
 /*
  * Connection.cpp
  *
- *	Note: Currently needs some work on threading, comments
+ *	Note: Currently waiting on issue #41, issue #42
  *
  *  Created on: Feb 15, 2014
  *      Author: Paula Rudy (paular@wpi.edu)
@@ -100,11 +100,13 @@ Connection::Connection(int portNoSendToSet, char* IPAddressToSet) {
 int Connection::openConnection() {
 	if (!(isOpen())) {//Only if we are not fully connected should we try to open any new connections.
 
+		int rvReceive,rvSend;
+
 		if (!openBoolReceive)//Only if the receive TCP connection is not open should we attempt to open it
-			int rvReceive = openReceive(); //Open the receive TCP connection. openReceive must be called first to accept incoming connections.
+			rvReceive = openReceive(); //Open the receive TCP connection. openReceive must be called first to accept incoming connections.
 
 		if (!openBoolSend)//Only if the send TCP connection is not open should we attempt to open it
-			int rvSend = openSend();//Open the send TCP connection.
+			rvSend = openSend();//Open the send TCP connection.
 
 		if ((rvSend == 1) || (rvReceive == 1))//If either the call to openReceive() or openSend() ends with errors (indicated by a return value of 1)...
 			return 1;
@@ -135,10 +137,12 @@ int Connection::openConnection() {
  */
 int Connection::closeConnection() {
 
+	int rvReceive,rvSend;
+
 	if (openBoolReceive)//Only if the receive connection is currently open should we attempt to close it
-		int rvReceive = closeReceive();
+		rvReceive = closeReceive();
 	if (openBoolSend)//Only if the send connection is currently open should we attempt to close it
-		int rvSend = closeSend();
+		rvSend = closeSend();
 
 	if ((rvSend == 1) || (rvReceive == 1))//If either of the calls to close a connection return with errors....
 		return 1;
@@ -442,30 +446,97 @@ void Connection::checkState() {
 		openBool = false;
 }
 
-// TODO: Finish these
-
+/**
+ * Sends a message over this Connection.
+ * Will wait 5 seconds and try again if the buffer is full.
+ *
+ * Returns 0 if message is sent sucessfully, 1 otherwise.
+ *
+ * This function waiting on issue #41
+ */
 //int Connection::send(Message toSend) {
-//	if (!openBoolSend){
-//		perror("Connection::send: send socket not connected!");
+//
+//	if (!openBoolSend) {//Check to make sure the connection is open
+//		perror("Connection::send: send connection not connected!");
 //		return 1;
 //	}
 //
+//	int messageSizeInBytes = toSend.size();//Grab message size in bytes
+//
+//	if (send(sockfdSend, toSend, messageSizeInBytes, 0) == -1) {//If it fails...
+//
+//		if (errno == 105) {//If the TCP buffer is full...
+//
+//			sleep(5);//Wait 5 seconds
+//
+//			//Try again
+//			if (send(sockfdSend, toSend, messageSizeInBytes, 0) == -1) { //if it fails again..
+//				perror("Connection::send: send failed! Buffer full.");
+//				return 1;
+//			}
+//
+//		} else { //Something else happened
+//			perror("Connection::send: send failed!");
+//			return 1;
+//		}
+//
+//	}
+//
+//	return 0;//Indicate a successful send
+//
 //}
 
+//This function waiting on resolution of issue #42
 //Message Connection::receive() {
+//	std::fstream bufferFileStream;
+//	mutexForBufferFile.lock();//Make sure to lock the mutexForBufferFile so others can't write to it while we're looking at it
+//	bufferFileStream.open(IPAddress, std::ios::in | std::ios::out);//Open the file with the filename = IPAddress (the IP address of the connection). If it does not exist yet, create it.
 //
+//	char buffer[9999];//TODO: put real value for max message size
+//
+//	char x;
+//	bufferFileStream >> x;
+//	int i = 0;
+//
+//	while (!((x == EOF) || (x == '\0'))) {
+//		buffer[i] = x;
+//		i++;
+//		bufferFileStream >> x;
+//	}
+//
+//	//Need to have a way to convert filled buffer to message
+//
+//	int endOfMessage = bufferFileStream.tellg();
+//
+//	bufferFileStream.seekg(0, bufferFileStream.end);
+//	int lengthOfFile = bufferFileStream.tellg();
+//	int lengthOfRemaining = lengthOfFile - endOfMessage;
+//
+//	char remainingBuffer[lengthOfRemaining];
+//
+//	bufferFileStream.seekg(lengthOfFile);
+//
+//	char y;
+//	bufferFileStream >> y;
+//	int j = 0;
+//
+//	while (!(j == EOF)) {
+//		remainingBuffer[j] = y;
+//		j++;
+//		bufferFileStream >> y;
+//	}
+//
+//	bufferFileStream.close();//Close the file so we can open it again in truncuate (over -write) mode
+//	bufferFileStream.open(IPAddress, std::ios::out | std::ios::trunc);//Open the file with the filename = IPAddress (the IP address of the connection) in overwrite mode
+//
+//	for (j = 0; j < lengthOfRemaining; j++)
+//		remainingBuffer[j] >> bufferFileStream;
+//
+//	bufferFileStream.close(); //Close the file so others can use it
+//
+//	mutexForBufferFile.unlock();//Unlock the mutexForBufferFile so that others know the file is availible
+//
+//	return message;
 //}
-//
-//Connection newConnection(int portNoSendToSet, int portNoRecieveToSet,
-//		char* IPAddressToSet) {
-//
-//}
-//
-//void printConnection(Connection c) {
-//
-//}
-//
-//bool operator ==(const Connection &p1, const Connection &p2) {
-//
-//}
+
 

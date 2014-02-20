@@ -5,7 +5,7 @@
  *      Author: Sam Lalezari
  */
 
-#include "message.h"
+#include "../../include/message.h"
 
 Message::Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE],
 		bool flag, char m[constants::MAX_MESSAGE_SIZE]){

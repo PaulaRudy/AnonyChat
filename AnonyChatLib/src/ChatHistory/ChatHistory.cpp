@@ -5,7 +5,7 @@
  *      Author: Sam Lalezari
  */
 
-#include "chatHistory.h"
+#include "../../include/chatHistory.h"
 
 /**
  * Constructor for a History Entry
@@ -15,6 +15,7 @@
 HistoryEntry::HistoryEntry(string source, char m[constants::MAX_MESSAGE_SIZE]){
 	sourceName = source;
 	memcpy(message, m, constants::MAX_MESSAGE_SIZE);
+	entryIndex = -1;
 }
 
 /**
@@ -25,6 +26,7 @@ HistoryEntry::HistoryEntry(string source, char m[constants::MAX_MESSAGE_SIZE]){
 HistoryEntry::HistoryEntry(unsigned char source[constants::VID_SIZE], char m[constants::MAX_MESSAGE_SIZE]){
 	memcpy(sourceVID, source, constants::VID_SIZE);
 	memcpy(message, m, constants::MAX_MESSAGE_SIZE);
+	entryIndex = -1;
 
 }
 

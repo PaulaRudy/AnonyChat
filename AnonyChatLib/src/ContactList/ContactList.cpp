@@ -5,7 +5,7 @@
  *      Author: Sam Lalezari
  */
 
-#include "../include/ContactList/ContactList.h"
+#include "../../include/ContactList/ContactList.h"
 
 /**
  * Cheks to see if the contact is empty, if it is return true, otherwise return false

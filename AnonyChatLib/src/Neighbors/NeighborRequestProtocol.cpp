@@ -1,10 +1,7 @@
 #include <iostream>
-#include <stdlib>
 #include <unistd.h>
 #include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <winsock2.h>
 
 #include "messagepdu.h"
 #include "neighbor.h"
@@ -62,7 +59,7 @@ int invite_neighbor(char *ipaddr, int sockfd) {
 	thisNode.dest = 0;
 	thisNode.neighbors = NumberOfNeighbors();
 	thisNode.utilCounters = -1; // will denote an invitation
-	thisNode.n_addr = inet_addr(GetOwnIP());
+	//thisNode.n_addr = inet_addr(GetOwnIP());
 
 	rv = send(sockfd, (char *)&thisNode, sizeof(struct NeighborRequestPDU), 0);
 
@@ -101,7 +98,7 @@ int broadcastNeighborRequest() {
 	newRequest.dest = 0;
 	newRequest.neighbors = NumberOfNeighbors();
 	newRequest.utilCounters = 0; // starts at 0 and NOT an invitation
-	newRequest.n_addr = inet_addr(GetOwnIP());
+	//newRequest.n_addr = inet_addr(GetOwnIP());
 
 	retval = SendToAddress(0xffffffff, newRequest, sizeof(struct NeighborRequestPDU));
 

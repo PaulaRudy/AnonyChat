@@ -20,9 +20,12 @@
 #define UTILBENCHMARK1 80
 #define UTILBENCHMARK2 160
 
-void AddToNeighbors(string newNeighbor);
-int NumberOfNeighbors();
+int UserTrustLevel;
 
-vector<string> NeighborList;
+void AddToNeighbors(std::string newNeighbor);
+int NumberOfNeighbors();
+int SendToAddress(int, NeighborRequestPDU, int);
+
+std::vector<std::string> NeighborList;
 
 #endif /* NEIGHBORLIST_H_ */

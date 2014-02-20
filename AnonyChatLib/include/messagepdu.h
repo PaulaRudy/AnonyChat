@@ -17,12 +17,12 @@ class AnonyChatPDU {
 
 class NeighborRequestPDU : public AnonyChatPDU {
 	int numNeighbors;
-	string n_addr;
+	std::string n_addr;
 };
 
 class NetworkMessagePDU : public AnonyChatPDU {
 	unsigned size;
-	string msg;
+	std::string msg;
 };
 
 

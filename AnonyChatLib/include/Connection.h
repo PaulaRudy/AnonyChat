@@ -1,7 +1,8 @@
 /*
  * Connection.h
  *
- * Note: Currently needs some work on threading (see Connection.cpp), comments
+ * Header for the Connection.cpp file
+ *
  *  Created on: Feb 15, 2014
  *      Author: Paula Rudy (paular@wpi.edu)
  */
@@ -43,12 +44,12 @@ private:
 	std::mutex flagToReceiveThreadMutex;//Mutex lock for flagToReceiveThread
 	std::mutex mutexForBufferFile;//Mutex lock for the file used to buffer messages received through this connection
 	struct sigaction sa;//Used to reap dead processes
-	std::thread receiveThread;
-	int openSend();
-	int closeSend();
-	int openReceive();
-	int closeReceive();
-	void checkState();//used to update openBool
+	std::thread receiveThread;//Used to buffer incoming messages to a file (see Connection::openReceive() and receiveThreadFunction() in Connection.cpp for more details)
+	int openSend();//Open the send TCP connection (see Connection.cpp for more details)
+	int closeSend();//Close the send TCP connection (see Connection.cpp for more details)
+	int openReceive();//Open the receive TCP connection (see Connection.cpp for more details)
+	int closeReceive();//Open the receive TCP connection (see Connection.cpp for more details)
+	void checkState();//Used to update openBool (see Connection.cpp for more details)
 
 
 public:
@@ -56,18 +57,18 @@ public:
 	Connection(int portNoSendToSet, char* IPAddressToSet);
 	Connection(char* IPAddressToSet);
 	bool isOpen(){return openBool;};
-	int openConnection();
-	int closeConnection();
+	int openConnection();//Used to open both the send and receive TCP connections (see Connection.cpp for more details)
+	int closeConnection();//Used to close both the send and receive TCP connections (see Connection.cpp for more details)
 	char* getIPAddress(){return IPAddress;};
 	int* getSockReceive(){return &sockfdReceive;};
 	int* getSockSend(){return &sockfdSend;};
 	int getPortNoReceive(){return portNoReceive;};
 	int getPortNoSend(){return portNoSend;};
-	int send(Message toSend);
-	Message receive();
+	int send(Message toSend);//Used to send a message over an open send TCP connection (see Connection.cpp for more details)
+	Message receive();//Used to extract a message from the file buffer used by the receive thread  (see Connection.cpp for more details)
 
 };
-
+//The function executed by the receive thread. (see Connection.cpp for more details)
 void receiveThreadFunction(bool *flagToReceiveThread,int sockfdReceive, std::mutex *flagToReceiveThreadMutex, std::mutex *mutexForBufferFile, char* IPAddress);
 
 //Helper function: grabs the address stored in the sockaddr pointed to by sa, IPv4 *or* IPv6
@@ -86,11 +87,5 @@ void sigchld_handler(int s)
 {
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
-
-Connection newConnection(int portNoSendToSet, int portNoRecieveToSet, char* IPAddressToSet);
-
-void printConnection(Connection c);
-
-bool operator == (const Connection &p1, const Connection &p2);
 
 #endif /* CONNECTION_H_ */

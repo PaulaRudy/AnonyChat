@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include "../chatHistory.h"
 
 
 using namespace std;
@@ -21,6 +22,7 @@ class Contact {
 private:
 	unsigned char virtual_address[1024]; // Holds the most recent virtual address for the contact. Should this be 1024 bytes?
 	string contact_name; // Holds the name assigned to the contact.
+	HistoryLog chatLog;
 public:
 	Contact(unsigned char va[1024], string name);
 	Contact(){};
@@ -28,6 +30,8 @@ public:
 	string getName(){return contact_name;};
 	unsigned char* getAddr(){return virtual_address;};
 	string toString();
+	HistoryLog getChatLog(){return chatLog;};
+	void setChatLog(HistoryLog log){chatLog = log;};
 };
 
 class ContactList{

@@ -13,5 +13,5 @@ FORMS         = chatdialog.ui
 QT           += network widgets
 
 # install
-target.path = /QtWorkspace/AnonyChatGui
+target.path = /QtWorkspace/PaulaRudy-AnonyChat/AnonyChatGui
 INSTALLS += target

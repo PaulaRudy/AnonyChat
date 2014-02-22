@@ -1,5 +1,5 @@
 /**
- * neighborlist.h
+ * Neighborlist.h
  *
  * TODO: Needs a description here
  *
@@ -34,7 +34,7 @@ public:
 	~NeighborList();//Destructor. See NeighborList.cpp for more details.
 	void AddToNeighbors(std::string);//Function that adds a neighbor to the already existing list of neighbors. See NeighborList.cpp for more details.
 	int RemoveNeighbor(std::string);//Function to remove a specific neighbor from the list. See NeighborList.cpp for more details.
-	int NumberOfNeighbors(){return NeighborList.size();};//Return the number of neighbors this node has
+	int NumberOfNeighbors(){return list.size();};//Return the number of neighbors this node has
 };
 
 #endif /* NEIGHBORLIST_H_ */

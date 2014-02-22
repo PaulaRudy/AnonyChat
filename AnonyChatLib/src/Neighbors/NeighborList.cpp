@@ -8,7 +8,7 @@
  *      	Andrew
  *      	Paula Rudy (paular@wpi.edu)
  */
-#include "neighborList.h"
+#include "NeighborList.h"
 
 /**
  * Function that adds a neighbor to the already existing list of neighbors.
@@ -21,14 +21,14 @@
  */
 void NeighborList::AddToNeighbors(std::string newNeighborIP) {
 
-	auto result = find(NeighborList.begin(), NeighborList.end(), newNeighborIP);//Try to find the newNeighborIP in our current list of neighbors
+	auto result = find(list.begin(), list.end(), newNeighborIP);//Try to find the newNeighborIP in our current list of neighbors
 
-	if (result == NeighborList.end()) {//If we did not find the neighbor in the list...
+	if (result == list.end()) {//If we did not find the neighbor in the list...
 
-		if (NeighborList.size() == MAXNUMNEIGHBORSALLOWED)//If we are at capacity and need to remove the oldest neighbor before adding a new one...
-			NeighborList.erase(NeighborList.begin());//... erase the first neighbor on the list (which will be the oldest, since we add to the back)
+		if (list.size() == MAXNUMNEIGHBORSALLOWED)//If we are at capacity and need to remove the oldest neighbor before adding a new one...
+			list.erase(list.begin());//... erase the first neighbor on the list (which will be the oldest, since we add to the back)
 
-		NeighborList.push_back(newNeighborIP);//Add the new neighbor to the end of the list
+		list.push_back(newNeighborIP);//Add the new neighbor to the end of the list
 	}
 
 	return;
@@ -44,10 +44,10 @@ void NeighborList::AddToNeighbors(std::string newNeighborIP) {
  */
 int NeighborList::RemoveNeighbor(std::string NeighborIP) {
 	// attempt to find the specified neighborIP in our neighbor list
-	auto result = find(NeighborList.begin(), NeighborList.end(), NeighborIP);
+	auto result = find(list.begin(), list.end(), NeighborIP);
 
-	if (result != NeighborList.end()) {//We found it!
-		NeighborList.erase(result);//Erase the entry
+	if (result != list.end()) {//We found it!
+		list.erase(result);//Erase the entry
 		return 0;
 	} else { //We didn't find it
 		return -1;

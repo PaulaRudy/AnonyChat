@@ -81,7 +81,8 @@ void ContactList::remove(string contactName){
 	for(unsigned int i = 0; i < contact_list.size(); i++){
 		Contact c = contact_list.at(i);
 		if(c.getName().compare(contactName) == 0){
-
+			contact_list.erase(contact_list.begin()+i);
+			return;
 		}
 	}
 }

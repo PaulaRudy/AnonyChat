@@ -34,6 +34,10 @@ int main() {
 
 	cout << list.toString();
 
+	cout << "\n\nContactList Removing Scooby:\n";
+	list.remove("Scooby");
+	cout << list.toString();
+
 	cout << "\n\nContactList Writing:\n";
 	ofstream file;
 	file.open("testwritefile.txt");

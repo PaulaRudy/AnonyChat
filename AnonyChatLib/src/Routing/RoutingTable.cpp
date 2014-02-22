@@ -1,5 +1,7 @@
+//TODO: Put a header comment here
 #include "RoutingTable.h"
 
+//TODO: Put a function header comment here
 RoutingTable::RoutingTable(void) {
 //TODO: Put code here to initalize the routing table from a file
 }
@@ -41,7 +43,7 @@ int RoutingTable::UpdateTableEntry(VirtualAddress destaddr, string ipaddr,
 			it->second.insert(pair<string, int> (ipaddr, utilcounter));// Then we need to insert this connection/util counter combination into the map for this VID
 
 			//Sort the map (the map of utility count/connection IP address pairs for this connection) before returning:
-
+			//TODO: This should probbably be a function.
 			vector<pair<string, int>> mapSort;
 
 			mapSort = new vector<pair<string, int>> (it->second.begin(), //In order to sort the map we need to convert it to a vector first
@@ -56,7 +58,7 @@ int RoutingTable::UpdateTableEntry(VirtualAddress destaddr, string ipaddr,
 			it->second.insert(pair<string, int> (ipaddr, utilcounter));// And insert this connection/util counter combination
 
 			//Sort the map (the map of utility count/connection IP address pairs for this connection) before returning:
-
+			//TODO: This should probbably be a function.
 			vector<pair<string, int>> mapSort;
 
 			mapSort = new vector<pair<string, int>> (it->second.begin(), //In order to sort the interior map we need to convert it to a vector first
@@ -111,6 +113,7 @@ bool Routing_SortConnections(pair<string, int> first, pair<string, int> second) 
 	}
 }
 
+//TODO: Put a function header comment here
 RoutingTable::~RoutingTable(void) {
 //TODO: Put code here to store the routing table to a file before exit
 }

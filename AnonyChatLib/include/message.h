@@ -22,6 +22,8 @@ private:
 
 public:
 	Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE], bool flag, char m[constants::MAX_MESSAGE_SIZE]);
+	Message(char m[constants::MAX_MESSAGE_SIZE]){memcpy(message, m, constants::MAX_MESSAGE_SIZE);};
+	size_t getMessageSize();
 };
 
 

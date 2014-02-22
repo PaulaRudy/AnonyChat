@@ -17,3 +17,15 @@ Message::Message(unsigned char source[constants::VID_SIZE], unsigned char dest[c
 	sendTime = 0;
 	utilityCounter = 0;
 }
+
+/**
+ * @return The size of the message, including all of the headers.
+ */
+size_t Message::getMessageSize(){
+	size_t size = 0;
+
+	size += sizeof(sourceVID) + sizeof(destVID) + sizeof(utilityCounter) + sizeof(sendTime) + sizeof(broadcastFlag);
+	size += strlen(message);
+
+	return size;
+}

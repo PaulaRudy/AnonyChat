@@ -54,7 +54,7 @@ void printContact(Contact c){
 void ContactList::add(Contact c){
 	for(unsigned int i = 0; i < contact_list.size(); i++){
 		Contact contact = contact_list.at(i);
-		if(contact.getName().compare(c.getName())){
+		if(!contact.getName().compare(c.getName())){
 			return;
 		}
 	}
@@ -86,14 +86,53 @@ void ContactList::remove(string contactName){
 	}
 }
 
+/**
+ * Writes the contact list to a given ofstream
+ *
+ * A single end line char delimites the name from it's VID, and two end line characters
+ * delimites two contacts.
+ *
+ * For example, if there was a contact list with two contacts Sue and Sally
+ *  with VIDs of 1 and 2, respectivly. The output will look like this:
+ *
+ *  -----------------------
+ *  Sue
+ *  1
+ *
+ *  Sally
+ *  2
+ *  -----------------------
+ *
+ * @param s the stream to write the file to
+ *
+ */
 void ContactList::write(ofstream& s){
 	for(unsigned int i = 0; i < contact_list.size(); i++){
 		Contact c = contact_list.at(i);
-		s.write(c.getName().c_str(), sizeof(c.getName().c_str()));
-		s.write("\n", sizeof("\n"));
-		s.write((const char*)&c.getAddr()[0], constants::VID_SIZE);
-		s.write("\n\n", sizeof("\n\n"));
+		s << c.getName();
+		s << "\n";
+		s << c.getAddr();
+		s << "\n\n";
 	}
+}
+
+ContactList readContactList(string path){
+	ifstream infile(path.c_str(), ifstream::in);
+	ContactList list;
+
+	string name;
+	string VID;
+
+	while(infile.peek() != EOF){
+		getline(infile, name);
+		getline(infile, VID);
+		list.add(Contact((unsigned char*)VID.c_str(), name));
+		getline(infile, name);
+		name.clear();
+		VID.clear();
+	}
+
+	return list;
 }
 
 

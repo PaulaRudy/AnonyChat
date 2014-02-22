@@ -47,6 +47,7 @@ public:
 
 void printContact(Contact c);
 
+ContactList readContactList(string path);
 
 bool operator == (const Contact &p1, const Contact &p2);
 

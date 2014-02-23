@@ -10,6 +10,11 @@ RM := rm -rf
 -include sources.mk
 -include subdir.mk
 -include src/subdir.mk
+-include src/Routing/subdir.mk
+-include src/Neighbors/subdir.mk
+-include src/Messages/subdir.mk
+-include src/ContactList/subdir.mk
+-include src/ChatHistory/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)

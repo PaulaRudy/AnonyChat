@@ -33,8 +33,10 @@
 #include <cstring>
 #include <sys/wait.h>
 #include <signal.h>
+#include <ifaddrs.h>
 #include <mutex>
 #include "messagepdu.h"
+#include "NeighborList.h"
 
 class NeighborRequestConnection {
 private:
@@ -43,10 +45,13 @@ private:
 	std::mutex flagToFrontDoorThreadMutex;//Mutex lock for flagToFrontDoorThread
 	std::thread frontDoorThread;//Used listen at the frontDoor for incoming connection requests and to handle them as they occur. See listenThreadFunction as defined in NeighborRequestConnection.cpp
 	int openFrontDoor(char* IPAddress);//Used to open or reopen the front door connection.  See NeighborRequestConnection.cpp for more details.
+	int useFrontDoor(NeighborRequestPDU toSend, NeighborRequestPDU *toReceive, char* IPAddress);//Internally used to send a NeighborRequestPDU to a specific IP address. See NeighborRequestConnection.cpp for more details.
+	bool EvaluateNeighborRequest(NeighborRequestPDU newNeighbor);//Used to decide to accept a neighbor, ask the user, or discard a neighbor request passed in as newNeighbor. See NeighborRequestConnection.cpp for more details.
 public:
 	NeighborRequestConnection();//Constructor. See NeighborRequestConnection.cpp for more details.
 	~NeighborRequestConnection();//Destructor. Needed to signal the frontDoorThread to clean up and exit before the NeighborRequestConnection is destroyed.
-	int useFrontDoor(NeighborRequestPDU toSend, NeighborRequestPDU *toReceive, char* IPAddress);
+	int broadcastNeighborRequest();//Used to broadcast a neighbor request on all active connections. See NeighborRequestConnection.cpp for more details.
+	int invite_neighbor(char * ipaddr, NeighborList list);//Invite a node at a specific IP address to become our neighbor. Uses the private useFrontDoor function.  NeighborRequestConnection.cpp for more details.
 };
 
 void listenThreadFunction(bool *flagToFrontDoorThread, int frontDoorSockfd,

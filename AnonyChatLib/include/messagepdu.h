@@ -1,14 +1,22 @@
 /*
- * essentials.h
+ * messagepdu.h
+ *
+ * TODO: Needs a description. Needs comments.
+ * TODO: Should we integrate this and message.h?
  *
  *  Created on: Feb 13, 2014
- *      Author: Andrew
+ *      Authors:
+ *      	Andrew
+ *      	Paula Rudy (paular@wpi.edu)
  */
 
 #ifndef ESSENTIALS_H_
 #define ESSENTIALS_H_
 
+#include <string>
+
 class AnonyChatPDU {
+public:
 	unsigned opcode;
 	long long unsigned src;
 	long long unsigned dest;
@@ -16,13 +24,15 @@ class AnonyChatPDU {
 };
 
 class NeighborRequestPDU : public AnonyChatPDU {
+public:
 	int numNeighbors;
-	std::string n_addr;
+	char *n_addr;
 };
 
 class NetworkMessagePDU : public AnonyChatPDU {
+public:
 	unsigned size;
-	std::string msg;
+	char *msg;
 };
 
 

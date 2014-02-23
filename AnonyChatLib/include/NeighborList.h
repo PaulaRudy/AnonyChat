@@ -16,6 +16,8 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <unistd.h>
+
 
 //TODO: These should probbably go in the config.h header
 #define PORT 9191

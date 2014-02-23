@@ -10,6 +10,7 @@
  *	Please note that there are multiple threads being used here, and use
  *	appropriate caution.
  *
+ *
  *	NOTE: This file not yet finished. Please see the TODO comments.
  *
  *  Created on: Feb 22, 2014
@@ -303,6 +304,43 @@ int NeighborRequestConnection::useFrontDoor(NeighborRequestPDU toSend,
 			frontDoorSockfd, &flagToFrontDoorThreadMutex);
 
 	return 0;
+}
+
+/**
+ * This function is used to create and send a NeighborRequestPDU (see message.h) to
+ * a specific IP address (passed in as "IPAddress") and receive and process a reply
+ * NeighborRequestPDU using the private function "useFrontDoor" (defined in this file-
+ * see definition for more details)
+ *
+ * Returns 1 if an error is encountered, 0 upon sucessful compleation.
+ */
+int NeighborRequestConnection::invite_neighbor(char * ipaddr, NeighborList list){
+	int rv;
+	struct NeighborRequestPDU requestToSend, requestToReceive;
+
+	requestToSend.opcode = 0;
+	requestToSend.src = 0;
+	requestToSend.dest = 0;
+	requestToSend.numNeighbors = list.NumberOfNeighbors();
+	requestToSend.utilCounter = -1; // will denote an invitation
+	requestToSend.n_addr = "127.0.0.1";//TODO: put code here to get node's IP address and put it here
+
+	rv = useFrontDoor(requestToSend, &requestToReceive,requestToSend.n_addr);
+
+	//TODO: put code here to handle neighbor request message received (in requestToReceive)
+	return rv;
+}
+
+//TODO: Needs a real function header
+//Used to broadcast a neighbor request on all active connections.
+int NeighborRequestConnection::broadcastNeighborRequest() {
+//TODO: Finish this function
+}
+
+//TODO: Needs a real function header
+//Used to decide to accept a neighbor, ask the user, or discard a neighbor request passed in as newNeighbor.
+bool NeighborRequestConnection::EvaluateNeighborRequest(NeighborRequestPDU newNeighbor) {
+	//TODO: Finish this function
 }
 
 /**

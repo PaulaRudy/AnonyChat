@@ -3,7 +3,7 @@
 
 //TODO: Put a function header comment here
 RoutingTable::RoutingTable(void) {
-//TODO: Put code here to initalize the routing table from a file
+//TODO: Put code here to initalize the routing table from a file or make a new table if that file is not found
 }
 
 /**
@@ -211,11 +211,16 @@ int RoutingTable::fillAndSortListOfRoutesForVirtualAddress(long long unsigned vi
 
 
 //TODO: finish this.
-int RoutingTable::RouteMessage(Message, Connection){
+int RoutingTable::RouteMessage(Message){
+	//Find open connection to a neighbor with the lowest utility count stored in the routing table.
+	//Remove entries for closed connections? Could help for network topology changes.
+	//Send message over that connection, if found.
+	//Broadcast message on all open connections if no entry for the destination VID is found.
+	//Return 1 if no open connections (this node had no neighbors) or if error sending message.
 	return 0;//Indicate success
 }
 
 //TODO: Put a function header comment here
 RoutingTable::~RoutingTable(void) {
-//TODO: Put code here to store the routing table to a file before exit
+//TODO: Put code here to store the routing table to a file and clean up memory before exit
 }

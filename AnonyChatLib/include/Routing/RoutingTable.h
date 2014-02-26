@@ -15,6 +15,8 @@
  * This class is used only within the routing table to hold an IP address
  * of a currently connected neighbor and the lowest utility count observed
  * on messages arrived through that neighbor for a specific virtual address.
+ *
+ * TODO: Put this in it's own header maybe? I don't see how it would be needed without needing the routing table class too, so maybe not...
  */
 class NeighborUtilCountPair{
 public:

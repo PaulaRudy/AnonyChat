@@ -9,6 +9,7 @@
 #include <iostream>
 #include <SampleHeader.h>
 #include "ContactList/ContactList.h"
+#include "chatHistory.h"
 
 using namespace std;
 
@@ -51,6 +52,37 @@ int main() {
 	cout << list2.toString();
 	cout << "read from file";
 
+	cout << "\n\nHistoryEntry toString:\n";
+	HistoryEntry e1 = HistoryEntry("Sam", "This is a test message");
+	e1.setSourceVID(testVID);
+	cout << e1.toString().c_str();
+
+	cout << "\n\nHistoryLog Printing:\n";
+	HistoryEntry e2 = HistoryEntry ("Sam", "This is another test message.");
+	e2.setSourceVID(testVID);
+
+	HistoryEntry e3 = HistoryEntry ("Sam", "This is a third test message.");
+	e3.setSourceVID(testVID);
+
+	HistoryLog historyLog = HistoryLog("Sam", testVID);
+	historyLog.addEntry(e1);
+	historyLog.addEntry(e2);
+	historyLog.addEntry(e3);
+
+	historyLog.print();
+
+
+	cout << "\n\nHistoryLog Writing:\n";
+	ofstream historyLogFile;
+	historyLogFile.open("testHistoryLogWrite");
+	historyLog.write(historyLogFile);
+	cout << "wrote to historyLogFile\n";
+	historyLogFile.close();
+
+
+	cout << "\n\nHistoryLog Reading:\n";
+	HistoryLog testLogFromRead = readHistoryLog("testHistoryLogWrite");
+	testLogFromRead.print();
 
 	return 0;
 }

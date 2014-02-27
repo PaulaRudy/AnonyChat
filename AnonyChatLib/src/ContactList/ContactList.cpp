@@ -117,19 +117,31 @@ void ContactList::write(ofstream& s){
 	}
 }
 
+
+/**
+ * Reads a contact list from a file that was created using ContactList::write().
+ * Constructs a contact list from the contents of the file and then returns it.
+ *
+ * @param path The path the the file to read from.
+ * @return A ContactList constructed from the given file.
+ */
 ContactList readContactList(string path){
 	ifstream infile(path.c_str(), ifstream::in);
 	ContactList list;
 
+	/* Place holders for the parts of a contact */
 	string name;
 	string VID;
 
 	while(infile.peek() != EOF){
-		getline(infile, name);
-		getline(infile, VID);
+		getline(infile, name); // Read the name of the contact from the file.
+		getline(infile, VID); // Read the VID of the contact from the file.
+
+		// Creates a new contact and adds it to the list.
 		list.add(Contact((unsigned char*)VID.c_str(), name));
-		getline(infile, name);
-		name.clear();
+
+		getline(infile, name); // Read the blank line, but do nothing with it.
+		name.clear(); // Clear the place holders so they are ready to use again.
 		VID.clear();
 	}
 

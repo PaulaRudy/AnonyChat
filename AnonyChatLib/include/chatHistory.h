@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 #include "message.h"
 
@@ -20,10 +22,10 @@ using namespace std;
 
 class HistoryEntry{
 private:
+	int entryIndex;
 	string sourceName;
 	unsigned char sourceVID[constants::VID_SIZE];
 	char message[constants::MAX_MESSAGE_SIZE];
-	int entryIndex;
 public:
 	HistoryEntry(string sourceName, char message[constants::MAX_MESSAGE_SIZE]);
 	HistoryEntry(unsigned char sourceVID[constants::VID_SIZE], char message[constants::MAX_MESSAGE_SIZE]);
@@ -33,6 +35,7 @@ public:
 	string getSourceName(){return sourceName;};
 	int setEntryIndex(int i){entryIndex = i; return entryIndex;};
 	void setSourceVID(unsigned char source[constants::VID_SIZE]){memcpy(sourceVID, source, constants::VID_SIZE);};
+	string toString();
 };
 
 class HistoryLog{
@@ -50,6 +53,10 @@ public:
 	void setSourceName(string name){sourceName = name;};
 	int addEntry(HistoryEntry);
 	int getLogSize(){return log.size();};
+	void write(ofstream& s);
+	void print();
 };
+
+HistoryLog readHistoryLog(string path);
 
 #endif /* CHATHISTORY_H_ */

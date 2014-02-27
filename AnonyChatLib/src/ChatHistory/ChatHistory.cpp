@@ -16,6 +16,7 @@ HistoryEntry::HistoryEntry(string source, char m[constants::MAX_MESSAGE_SIZE]){
 	sourceName = source;
 	memcpy(message, m, constants::MAX_MESSAGE_SIZE);
 	entryIndex = -1;
+	time(&entryTime);
 }
 
 /**
@@ -27,6 +28,7 @@ HistoryEntry::HistoryEntry(unsigned char source[constants::VID_SIZE], char m[con
 	memcpy(sourceVID, source, constants::VID_SIZE);
 	memcpy(message, m, constants::MAX_MESSAGE_SIZE);
 	entryIndex = -1;
+	time(&entryTime);
 
 }
 
@@ -34,7 +36,7 @@ HistoryEntry::HistoryEntry(unsigned char source[constants::VID_SIZE], char m[con
  * @return A string that is human readable, and also parsable by the readHistoryLog() function.
  *		   The output will look like the following:
  *		   ========================================
- *		   Index; SourceName\n
+ *		   Index;Time; SourceName\n
  *		   VID\n
  *		   Message\n
  *
@@ -43,7 +45,7 @@ HistoryEntry::HistoryEntry(unsigned char source[constants::VID_SIZE], char m[con
  *		   For example, a message sent by Andrew with
  *		   an index of 0 will look like:
  *		   ========================================
- *		   0; Andrew
+ *		   0;1393476530; Andrew
  *		   8435714272899213895181290124015812923481
  *		   This is a message that has been sent from Andrew.
  *
@@ -53,7 +55,7 @@ HistoryEntry::HistoryEntry(unsigned char source[constants::VID_SIZE], char m[con
 string HistoryEntry::toString(){
 
 	stringstream ss;
-	ss << entryIndex << "; " + sourceName + "\n";
+	ss << entryIndex << ";" << entryTime << ";" + sourceName + "\n";
 	ss << sourceVID << "\n";
 	ss << message << "\n";
 
@@ -96,7 +98,7 @@ int HistoryLog::addEntry(HistoryEntry entry){
  *  SourceName\n
  *  SourceVID\n
  *  \n
- *  entryIndex; Name\n
+ *  entryIndex; entryTime; Name\n
  *  VID\n
  *  Message\n
  *
@@ -109,11 +111,11 @@ int HistoryLog::addEntry(HistoryEntry entry){
  *  Sue
  *  1
  *
- *  0; Sue
+ *  0;1393476530; Sue
  *  1
  *  This is a message from Sue.
  *
- *  1; Sue
+ *  1;1393476532; Sue
  *  1
  *  This is a message from Sue.
  *
@@ -162,6 +164,7 @@ HistoryLog readHistoryLog(string path){
 	string index;
 	string VID;
 	string message;
+	string timestring;
 
 	getline(infile, name); // Get's the source name at the beginning of the file.
 	getline(infile, VID);  // Get's the source VID  at the beginning of the file.
@@ -174,13 +177,15 @@ HistoryLog readHistoryLog(string path){
 
 	while(infile.peek() != EOF){
 		getline(infile, index, ';'); // Not really used, because the functions is assuming that the indexes
-		getline(infile, name);       // of entries are the same as the order they are in.
+									 // of entries are the same as the order they are in.
+		getline(infile, timestring, ';');
+		getline(infile, name);
 		getline(infile, VID);
 		getline(infile, message);
 
 		HistoryEntry e = HistoryEntry(name, (char*)message.c_str()); // A new temporary history entry
 		e.setSourceVID((unsigned char*)VID.c_str());
-
+		e.setTime((time_t)timestring.c_str());
 		log.addEntry(e); // Adds the temp entry to the history log
 
 		getline(infile, name); // Read the blank line, but do nothing with it.
@@ -188,6 +193,7 @@ HistoryLog readHistoryLog(string path){
 		VID.clear();
 		message.clear();
 		index.clear();
+		timestring.clear();
 	}
 
 	return log;

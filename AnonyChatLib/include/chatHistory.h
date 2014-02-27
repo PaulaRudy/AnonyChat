@@ -26,6 +26,7 @@ private:
 	string sourceName;
 	unsigned char sourceVID[constants::VID_SIZE];
 	char message[constants::MAX_MESSAGE_SIZE];
+	time_t entryTime;
 public:
 	HistoryEntry(string sourceName, char message[constants::MAX_MESSAGE_SIZE]);
 	HistoryEntry(unsigned char sourceVID[constants::VID_SIZE], char message[constants::MAX_MESSAGE_SIZE]);
@@ -36,6 +37,7 @@ public:
 	int setEntryIndex(int i){entryIndex = i; return entryIndex;};
 	void setSourceVID(unsigned char source[constants::VID_SIZE]){memcpy(sourceVID, source, constants::VID_SIZE);};
 	string toString();
+	void setTime(time_t t){entryTime = t;};
 };
 
 class HistoryLog{

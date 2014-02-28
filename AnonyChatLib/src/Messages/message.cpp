@@ -46,3 +46,8 @@ unsigned long long Message::getVID(bool wantSource) {
 int Message::getUCounters() {
 	return utilityCounter;
 }
+
+void Message::setUCounters(int UCval) {
+	utilityCounter = UCval;
+	return;
+}

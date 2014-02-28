@@ -22,11 +22,9 @@
 
 //TODO: These should probbably go in the config.h header
 #define PORT 9191
-#define NEIGHBORVALUE1 4
-#define NEIGHBORVALUE2 6
-#define MAXNUMNEIGHBORSALLOWED 8
-#define UTILBENCHMARK1 80
-#define UTILBENCHMARK2 160
+#define MINNEIGHBORS 4
+#define MAXNEIGHBORS 8
+#define UTILBENCHMARK 50
 int UserTrustLevel;
 
 class NeighborList {

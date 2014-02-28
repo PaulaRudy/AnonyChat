@@ -238,6 +238,9 @@ int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
 		return 2;
 	}
 
+	// we want to now update the utility counters for the next hop
+	toSend.setUCounters(toSend.getUCounters() + TheNeighbors.NumberOfNeighbors() + 1);
+
 	// extract this message's neighbor pair information
 	neighborPair->IPAddress = srcNeighborIP;
 	neighborPair->utilityCount = toSend.getUCounters();

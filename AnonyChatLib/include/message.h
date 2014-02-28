@@ -30,6 +30,7 @@ public:
 	size_t getMessageSize();
 	long long unsigned getVID(bool);
 	int getUCounters();
+	void setUCounters(int);
 };
 
 

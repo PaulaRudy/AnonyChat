@@ -340,6 +340,34 @@ int NeighborRequestConnection::broadcastNeighborRequest() {
 //TODO: Needs a real function header
 //Used to decide to accept a neighbor, ask the user, or discard a neighbor request passed in as newNeighbor.
 bool NeighborRequestConnection::EvaluateNeighborRequest(NeighborRequestPDU newNeighbor) {
+	// TODO: code for if we have already seen a neighbor request for this ipaddress in the last few minutes
+/*
+	// if our user has set the user trust level and we're below that threshold
+	if (newNeighbor.numNeighbors < UserTrustLevel) {
+		return false;
+	} // otherwise we want to evaluate this request on its merits
+
+	// if we do not have the desired minimum number of neighbors
+	if (TheNeighbors.NumberOfNeighbors() < MINNEIGHBORS) {
+		// we want to add this neighbor no matter what
+		TheNeighbors.list.push_back(newNeighbor.n_addr);
+		// then we want to return
+		return true;
+	}
+
+	// otherwise if this node has less than the maximum number of neighbors
+	else if (TheNeighbors.NumberOfNeighbors() < MAXNEIGHBORS) {
+		// and if the Utility Counter value is over the threshold value
+		if (newNeighbor.utilCounter > UTILBENCHMARK) {
+			// then we want to add this neighbor
+			TheNeighbors.list.push_back(newNeighbor.n_addr);
+			// then we want to return
+			return true;
+		// otherwise we don't want to accept this neighbor
+		} else return false;
+	}
+*/
+	// finally, if this node already has the maximum number of neighbors
 	//TODO: Finish this function
 }
 

@@ -53,3 +53,59 @@ int NeighborList::RemoveNeighbor(std::string NeighborIP) {
 		return -1;
 	}
 }
+
+/**
+ * takes as input the filename to use to configure the neighbor list
+ */
+
+void NeighborList::ReadNeighborList(char *filename) {
+	std::ifstream setupfile;
+	std::string line;
+
+	// open the file for reading
+	setupfile.open(filename);
+
+	// make sure our list is empty
+	list.clear();
+
+	// read in each ip address
+	while (getline (setupfile, line)) {
+		list.push_back(line);
+	}
+
+	// once we're done close the file
+	setupfile.close();
+
+	//return
+	return;
+}
+
+
+/**
+ * takes as input the filename to use to store the neighbor list
+ */
+
+void NeighborList::WriteNeighborList(char *filename) {
+	std::ofstream setupfile;
+	std::vector<std::string>::iterator it;
+
+	// open the file for writing
+	setupfile.open(filename);
+
+	// iterate through the list, putting the contents of each line into the file
+	for (it = list.begin(); it != list.end(); it++) {
+		setupfile << *it;
+		setupfile << '\n';
+	}
+
+	// we're done, close our file
+	setupfile.close();
+
+	// return
+	return;
+
+}
+
+
+
+

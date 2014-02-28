@@ -1,4 +1,14 @@
-//TODO: Put a header comment here
+/**
+ * RoutingTable.cpp
+ *
+ * functions for the routing table class used to build, maintian, and utilize the routing table
+ * includes the routeMessage function that will determine where a message should be sent
+ *
+ *  Created on: Feb 13, 2014
+ *      Authors:
+ *      	Andrew
+ *      	Paula Rudy (paular@wpi.edu)
+ */
 #include "RoutingTable.h"
 #include "NeighborList.h"
 #include "Connection.h"
@@ -212,8 +222,6 @@ int RoutingTable::fillAndSortListOfRoutesForVirtualAddress(long long unsigned vi
 
 }
 
-
-//TODO: finish this.
 int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
 	Connection *sendConnection;
 	std::multimap<long long unsigned, NeighborUtilCountPair>::iterator it;

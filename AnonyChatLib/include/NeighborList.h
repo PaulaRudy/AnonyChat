@@ -12,6 +12,7 @@
 #define NEIGHBORLIST_H_
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -33,6 +34,8 @@ public:
 	std::vector<std::string> list; //The actual list of neighbors
 	NeighborList();//Constructor. See NeighborList.cpp for more details.
 	~NeighborList();//Destructor. See NeighborList.cpp for more details.
+	void ReadNeighborList(char *); //takes a filename and populates the neighbor list from the file specified
+	void WriteNeighborList(char *); //takes a filename and writes the neighbor list to the file specified
 	void AddToNeighbors(std::string);//Function that adds a neighbor to the already existing list of neighbors. See NeighborList.cpp for more details.
 	int RemoveNeighbor(std::string);//Function to remove a specific neighbor from the list. See NeighborList.cpp for more details.
 	int NumberOfNeighbors(){return list.size();};//Return the number of neighbors this node has

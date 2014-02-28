@@ -45,7 +45,6 @@ private:
 	std::mutex mutexForBufferFile;//Mutex lock for the file used to buffer messages received through this connection
 	struct sigaction sa;//Used to reap dead processes
 	std::thread receiveThread;//Used to buffer incoming messages to a file (see Connection::openReceive() and receiveThreadFunction() in Connection.cpp for more details)
-	int openSend();//Open the send TCP connection (see Connection.cpp for more details)
 	int closeSend();//Close the send TCP connection (see Connection.cpp for more details)
 	int openReceive();//Open the receive TCP connection (see Connection.cpp for more details)
 	int closeReceive();//Open the receive TCP connection (see Connection.cpp for more details)
@@ -57,6 +56,7 @@ public:
 	Connection(int portNoSendToSet, char* IPAddressToSet);
 	Connection(char* IPAddressToSet);
 	bool isOpen(){return openBool;};
+	int openSend();//Open the send TCP connection (see Connection.cpp for more details)
 	int openConnection();//Used to open both the send and receive TCP connections (see Connection.cpp for more details)
 	int closeConnection();//Used to close both the send and receive TCP connections (see Connection.cpp for more details)
 	char* getIPAddress(){return IPAddress;};

@@ -3,6 +3,7 @@
  *
  *  Created on: Feb 15, 2014
  *      Author: Sam Lalezari
+ *      		Andrew McKay
  */
 
 #ifndef MESSAGE_H_
@@ -10,6 +11,9 @@
 
 #include "config.h"
 #include <time.h>
+
+// messages between neighbors shall be sent to port 9191
+#define MESSAGEPORT 9191
 
 class Message {
 private:
@@ -24,6 +28,8 @@ public:
 	Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE], bool flag, char m[constants::MAX_MESSAGE_SIZE]);
 	Message(char m[constants::MAX_MESSAGE_SIZE]){memcpy(message, m, constants::MAX_MESSAGE_SIZE);};
 	size_t getMessageSize();
+	long long unsigned getVID(bool);
+	int getUCounters();
 };
 
 

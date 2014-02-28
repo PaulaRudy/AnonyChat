@@ -1,5 +1,8 @@
 //TODO: Put a header comment here
 #include "RoutingTable.h"
+#include "NeighborList.h"
+#include "Connection.h"
+#include "message.h"
 
 //TODO: Put a function header comment here
 RoutingTable::RoutingTable(void) {
@@ -211,12 +214,105 @@ int RoutingTable::fillAndSortListOfRoutesForVirtualAddress(long long unsigned vi
 
 
 //TODO: finish this.
-int RoutingTable::RouteMessage(Message){
-	//Find open connection to a neighbor with the lowest utility count stored in the routing table.
-	//Remove entries for closed connections? Could help for network topology changes.
-	//Send message over that connection, if found.
-	//Broadcast message on all open connections if no entry for the destination VID is found.
-	//Return 1 if no open connections (this node had no neighbors) or if error sending message.
+int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
+	Connection *sendConnection;
+	std::multimap<long long unsigned, NeighborUtilCountPair>::iterator it;
+	std::list<NeighborUtilCountPair> neighborList;
+	std::vector<std::string>::iterator neighborIT;
+	NeighborUtilCountPair *neighborPair;
+	std::string neighborIP;
+	int retval;
+
+	// if the number of utility counters has become too large
+	if (toSend.getUCounters() > UC_Limit) {
+		// then we no longer want to route this message and will simply drop it
+		// without doing anything else
+		return 2;
+	}
+
+	// extract this message's neighbor pair information
+	neighborPair->IPAddress = srcNeighborIP;
+	neighborPair->utilityCount = toSend.getUCounters();
+
+	// if we aren't over the UC_Limit we want to try adding this message's VID,
+	// neighbor ip, and UC value to the RoutingTable
+	UpdateTableEntry(toSend.getVID(true), *neighborPair);
+
+	// if the utility counters associated with the message are acceptable
+	// then we want to check if we know how to get to the destination VID
+	it = table.find(toSend.getVID(false));
+
+	// if the entry wasn't in the routing table then we want to broadcast it
+	if (it == table.end()) {
+
+		// for each neighbor in the neighbor list that isn't the srcNeighborIP
+		for (neighborIT = TheNeighbors.list.begin();
+				neighborIT != TheNeighbors.list.end(); neighborIT++) {
+
+			// get the ip address of this neighbor
+			neighborIP = *neighborIT;
+
+			// if the neighborIP is our source neighbor skip this one
+			if (neighborIP == srcNeighborIP) continue;
+
+			// set up the connection to this neighbor
+			sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
+
+			// open a send connection
+			retval = sendConnection->openSend();
+
+			// if the connection was successfully opened send the message
+			if (retval) sendConnection->send(toSend);
+
+			// close the connection
+			sendConnection->closeConnection();
+
+		} // go to the next neighbor in the list
+
+	// otherwise if the dest VID HAD an entry in the routing table
+	} else { // we just choose the lowest UC neighbor associated in the table
+
+		// sort the list of neighbors and utility counters for this virtual address
+		this->fillAndSortListOfRoutesForVirtualAddress(toSend.getVID(false), &neighborList);
+
+		// once we have the sorted neighbor list we open a connection to the first neighbor IP
+		neighborIP = neighborList.front().IPAddress;
+
+		// now that we know the IP address of the neighbor we're sending to
+		// we can set up a connection with that neighbor
+		sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
+
+		// now that the connection is ready, we want to open a send connection
+		retval = sendConnection->openSend();
+
+		// as long as we haven't successfully opened a connection
+		while (!!retval) {
+
+			// we want to remove the unsuccessful connection from the list and table
+			RemoveTableEntry(toSend.getVID(false), neighborList.front());
+			neighborList.remove(neighborList.front());
+
+			// if the neighbor list is now empty then we failed to find any working neighbors
+			if (neighborList.empty()) return 1;
+
+			// otherwise we need the new optimal neighbor
+			neighborIP = neighborList.front().IPAddress;
+
+			// we want to set up a connection again
+			sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
+
+			// we then want to attempt to open a connection to the next front
+			retval = sendConnection->openSend();
+
+		} // once we have successfully opened a connection to a neighbor
+
+		// we want to actually send the message
+		sendConnection->send(toSend);
+
+		// then we want to close the connection and return
+		sendConnection->closeConnection();
+	}
+
 	return 0;//Indicate success
 }
 

@@ -11,6 +11,8 @@
 #include "message.h"
 #include "Connection.h"
 
+#define UCOUNTER_THRESHOLD 20
+
 /**
  * This class is used only within the routing table to hold an IP address
  * of a currently connected neighbor and the lowest utility count observed
@@ -67,6 +69,7 @@ public:
  */
 class RoutingTable {
 private:
+	int UC_Limit;
 	std::multimap<long long unsigned, NeighborUtilCountPair> table; //The actual routing table
 	int fillAndSortListOfRoutesForVirtualAddress(long long unsigned virtualAddress,std::list<NeighborUtilCountPair> *toFill);//Fills the list of NeighborUtilCountPairs with all entries in the routing table for the given virtual address, and sorts the list in ascending utility count order. See RoutingTable.cpp for more details.
 	int RemoveTableEntry(long long unsigned virtualAddress, NeighborUtilCountPair toRemove);//Function to remove only the entry from the routing table with the given virtual address and NeighborUtilCountPair. See RoutingTable.cpp for more details.
@@ -76,13 +79,14 @@ public:
 	void UpdateTableEntry(long long unsigned virtualAddress, NeighborUtilCountPair toAdd);//Function to add or update an entry in the routing table. See RoutingTable.cpp for more details.
 	int RemoveTableEntry(long long unsigned virtualAddress);//Function to remove all entries from the routing table with the given virtual address. See RoutingTable.cpp for more details.
 	// function to determine the path of a message
-	// takes as argument the message to be passed
+	// takes as argument the message to be passed and the source neighbor
+	// address this message was received from (if applicable);
 	// and a connection indicating which connection
 	// if any the message was received from
 	// returns an int indicating success or failure
 	//		failure is possible if every neighbor is down!
 	//		otherwise the routing protocol will attempt to recover
-	int RouteMessage(Message, Connection);//TODO: finish this.
+	int RouteMessage(Message, char*);//TODO: finish this.
 };
 
 #endif

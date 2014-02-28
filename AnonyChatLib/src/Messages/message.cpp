@@ -3,6 +3,7 @@
  *
  *  Created on: Feb 18, 2014
  *      Author: Sam Lalezari
+ *      		Andrew McKay
  */
 
 #include "../../include/message.h"
@@ -28,4 +29,20 @@ size_t Message::getMessageSize(){
 	size += strlen(message);
 
 	return size;
+}
+
+/**
+ * @return The source or destination virtual address as indicated by the bool argument
+ * true for source false for dest
+ */
+unsigned long long Message::getVID(bool wantSource) {
+	if (wantSource)	return (unsigned long long) sourceVID;
+	else return (unsigned long long) destVID;
+}
+
+/**
+ * @return The number of utility counters associated with this message
+ */
+int Message::getUCounters() {
+	return utilityCounter;
 }

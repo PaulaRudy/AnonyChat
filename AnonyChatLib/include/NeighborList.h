@@ -25,6 +25,7 @@
 #define MINNEIGHBORS 4
 #define MAXNEIGHBORS 8
 #define UTILBENCHMARK 50
+#define MAX_UCS 80
 int UserTrustLevel;
 
 class Neighbor{

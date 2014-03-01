@@ -366,9 +366,19 @@ bool NeighborRequestConnection::EvaluateNeighborRequest(NeighborRequestPDU newNe
 		// otherwise we don't want to accept this neighbor
 		} else return false;
 	}
-*/
+
 	// finally, if this node already has the maximum number of neighbors
-	//TODO: Finish this function
+	// and the Utility Counter value is above the limit
+	else if (newNeighbor.utilCounter > MAX_UCS) {
+
+		// then we want to dump our first neighbor
+		TheNeighbors.list.pop_back();
+		TheNeighbors.list.push_back(newNeighbor.n_addr);
+		return true;
+	}
+	*/
+
+	return false;
 }
 
 /**

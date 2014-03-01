@@ -19,16 +19,16 @@
  * 		global variable representing the list of neighbors
  * 		global mutex for the list of neighbors
  */
-void NeighborList::AddToNeighbors(std::string newNeighborIP) {
+void NeighborList::AddToNeighbors(Neighbor newNeighbor) {
 
-	auto result = find(list.begin(), list.end(), newNeighborIP);//Try to find the newNeighborIP in our current list of neighbors
+	auto result = find(list.begin(), list.end(), newNeighbor);//Try to find the newNeighborIP in our current list of neighbors
 
 	if (result == list.end()) {//If we did not find the neighbor in the list...
 
 		if (list.size() == MAXNEIGHBORS)//If we are at capacity and need to remove the oldest neighbor before adding a new one...
 			list.erase(list.begin());//... erase the first neighbor on the list (which will be the oldest, since we add to the back)
 
-		list.push_back(newNeighborIP);//Add the new neighbor to the end of the list
+		list.push_back(newNeighbor);//Add the new neighbor to the end of the list
 	}
 
 	return;
@@ -42,9 +42,9 @@ void NeighborList::AddToNeighbors(std::string newNeighborIP) {
  * Returns:
  * 		0 if successful, -1 if no such neighbor was in the list
  */
-int NeighborList::RemoveNeighbor(std::string NeighborIP) {
+int NeighborList::RemoveNeighbor(Neighbor newNeighbor) {
 	// attempt to find the specified neighborIP in our neighbor list
-	auto result = find(list.begin(), list.end(), NeighborIP);
+	auto result = find(list.begin(), list.end(),newNeighbor);
 
 	if (result != list.end()) {//We found it!
 		list.erase(result);//Erase the entry
@@ -68,16 +68,16 @@ void NeighborList::ReadNeighborList(char *filename) {
 	// make sure our list is empty
 	list.clear();
 
-	// read in each ip address
-	while (getline (setupfile, line)) {
-		list.push_back(line);
-	}
-
-	// once we're done close the file
-	setupfile.close();
-
-	//return
-	return;
+//	// read in each ip address
+//	while (getline (setupfile, line)) {
+//		list.push_back(line);
+//	}
+//
+//	// once we're done close the file
+//	setupfile.close();
+//
+//	//return
+//	return;
 }
 
 
@@ -93,10 +93,10 @@ void NeighborList::WriteNeighborList(char *filename) {
 	setupfile.open(filename);
 
 	// iterate through the list, putting the contents of each line into the file
-	for (it = list.begin(); it != list.end(); it++) {
-		setupfile << *it;
-		setupfile << '\n';
-	}
+	//for (it = list.begin(); it != list.end(); it++) {
+//		setupfile << *it;
+//		setupfile << '\n';
+//	}
 
 	// we're done, close our file
 	setupfile.close();
@@ -105,7 +105,6 @@ void NeighborList::WriteNeighborList(char *filename) {
 	return;
 
 }
-
 
 
 

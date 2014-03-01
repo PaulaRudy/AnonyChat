@@ -257,15 +257,15 @@ int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
 	// if the entry wasn't in the routing table then we want to broadcast it
 	if (it == table.end()) {
 
-		// for each neighbor in the neighbor list that isn't the srcNeighborIP
-		for (neighborIT = TheNeighbors.list.begin();
-				neighborIT != TheNeighbors.list.end(); neighborIT++) {
+		// for each neighbor in the neighbor list that isn't the srcNeighborIP //TODO: Fix this
+//		for (neighborIT = TheNeighbors.list.begin();
+//				neighborIT != TheNeighbors.list.end(); neighborIT++) {
 
 			// get the ip address of this neighbor
-			neighborIP = *neighborIT;
+//			neighborIP = *neighborIT;
 
 			// if the neighborIP is our source neighbor skip this one
-			if (neighborIP == srcNeighborIP) continue;
+//			if (neighborIP == srcNeighborIP) continue;
 
 			//TODO: fix this (need to add connection reference to neighbor list first)
 //			// set up the connection to this neighbor
@@ -280,7 +280,7 @@ int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
 //			// close the connection
 //			sendConnection->closeConnection();
 
-		} // go to the next neighbor in the list
+//		} // go to the next neighbor in the list
 
 	// otherwise if the dest VID HAD an entry in the routing table
 	} else { // we just choose the lowest UC neighbor associated in the table

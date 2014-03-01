@@ -45,7 +45,8 @@ private:
 	std::mutex flagToFrontDoorThreadMutex;//Mutex lock for flagToFrontDoorThread
 	std::thread frontDoorThread;//Used listen at the frontDoor for incoming connection requests and to handle them as they occur. See listenThreadFunction as defined in NeighborRequestConnection.cpp
 	int openFrontDoor(char* IPAddress);//Used to open or reopen the front door connection.  See NeighborRequestConnection.cpp for more details.
-	int useFrontDoor(NeighborRequestPDU toSend, NeighborRequestPDU *toReceive, char* IPAddress);//Internally used to send a NeighborRequestPDU to a specific IP address. See NeighborRequestConnection.cpp for more details.
+	int useFrontDoor(NeighborRequestPDU toSend, NeighborRequestPDU *toReceive,
+			char* IPAddress);//Internally used to send a NeighborRequestPDU to a specific IP address. See NeighborRequestConnection.cpp for more details.
 	bool EvaluateNeighborRequest(NeighborRequestPDU newNeighbor);//Used to decide to accept a neighbor, ask the user, or discard a neighbor request passed in as newNeighbor. See NeighborRequestConnection.cpp for more details.
 public:
 	NeighborRequestConnection();//Constructor. See NeighborRequestConnection.cpp for more details.
@@ -56,22 +57,5 @@ public:
 
 void listenThreadFunction(bool *flagToFrontDoorThread, int frontDoorSockfd,
 		std::mutex *flagToFrontDoorThreadMutex);//The function executed by the frontDoorThread. See NeighborRequestConnection.cpp for more details.
-
-//Helper function: grabs the address stored in the sockaddr pointed to by sa, IPv4 *or* IPv6
-void *getAddrFromSockaddr(struct sockaddr *sa)
-{
-	//If the sockaddr is IPv4...
-	if (sa->sa_family == AF_INET)
-		return &(((struct sockaddr_in*)sa)->sin_addr);//return the IP address stored in the sin_addr of sa
-
-	//The sockaddr must be IPv6
-	return &(((struct sockaddr_in6*)sa)->sin6_addr);//return the IP address stored in the sin6_addr of sa
-}
-
-//Helper function: handler used to reap dead processes
-void sigchld_handler(int s)
-{
-	while(waitpid(-1, NULL, WNOHANG) > 0);
-}
 
 #endif /* NEIGHBORREQUESTCONNECTION_H_ */

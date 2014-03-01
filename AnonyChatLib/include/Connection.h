@@ -49,8 +49,8 @@ private:
 	bool openBoolReceive;//Whether the receive connection is open or not
 	bool openBoolSend;//Whether the send connection is open or not
 	bool flagToReceiveThread;//Used to signal to receive thread that it should stop and join();
-	std::mutex flagToReceiveThreadMutex;//Mutex lock for flagToReceiveThread
-	std::mutex mutexForBufferFile;//Mutex lock for the file used to buffer messages received through this connection
+	std::mutex *flagToReceiveThreadMutex;//Mutex lock for flagToReceiveThread
+	std::mutex *mutexForBufferFile;//Mutex lock for the file used to buffer messages received through this connection
 	struct sigaction sa;//Used to reap dead processes
 	std::thread receiveThread;//Used to buffer incoming messages to a file (see Connection::openReceive() and receiveThreadFunction() in Connection.cpp for more details)
 	int closeSend();//Close the send TCP connection (see Connection.cpp for more details)
@@ -60,9 +60,9 @@ private:
 
 
 public:
-	Connection(int portNoSendToSet, int portNoRecieveToSet, char* IPAddressToSet);
-	Connection(int portNoSendToSet, char* IPAddressToSet);
-	Connection(char* IPAddressToSet);
+	Connection(int portNoSendToSet, int portNoRecieveToSet, char* IPAddressToSet, std::mutex *receiveThreadMutex, std::mutex *bufferFileMutex );
+	Connection(int portNoSendToSet, char* IPAddressToSet, std::mutex *receiveThreadMutex, std::mutex *bufferFileMutex );
+	Connection(char* IPAddressToSet, std::mutex *receiveThreadMutex, std::mutex *bufferFileMutex );
 	bool isOpen(){return openBool;};
 	int openSend();//Open the send TCP connection (see Connection.cpp for more details)
 	int openConnection();//Used to open both the send and receive TCP connections (see Connection.cpp for more details)
@@ -72,8 +72,9 @@ public:
 	int* getSockSend(){return &sockfdSend;};
 	int getPortNoReceive(){return portNoReceive;};
 	int getPortNoSend(){return portNoSend;};
-	int send(Message toSend);//Used to send a message over an open send TCP connection (see Connection.cpp for more details)
-	Message receive();//Used to extract a message from the file buffer used by the receive thread  (see Connection.cpp for more details)
+	int sendMessage(Message toSend);//Used to send a message over an open send TCP connection (see Connection.cpp for more details)
+	Message receiveMessage();//Used to extract a message from the file buffer used by the receive thread  (see Connection.cpp for more details)
+
 
 };
 //The function executed by the receive thread. (see Connection.cpp for more details)

@@ -44,7 +44,8 @@
  * and Connection::openReceive() for more details
  */
 Connection::Connection(int portNoSendToSet, int portNoRecieveToSet,
-		char* IPAddressToSet) {
+		char* IPAddressToSet, std::mutex *receiveThreadMutex,
+		std::mutex *bufferFileMutex) {
 	portNoReceive = portNoRecieveToSet;
 	portNoSend = portNoSendToSet;
 	IPAddress = IPAddressToSet;
@@ -52,6 +53,8 @@ Connection::Connection(int portNoSendToSet, int portNoRecieveToSet,
 	openBoolReceive = false;
 	openBoolSend = false;
 	flagToReceiveThread = false;
+	flagToReceiveThreadMutex = receiveThreadMutex;
+	mutexForBufferFile = bufferFileMutex;
 	openConnection();
 	checkState();
 }
@@ -65,7 +68,8 @@ Connection::Connection(int portNoSendToSet, int portNoRecieveToSet,
  * See Connection::Connection(int portNoSendToSet, int portNoRecieveToSet, char* IPAddressToSet)
  * as defined in this file for more detail.
  */
-Connection::Connection(int portNoSendToSet, char* IPAddressToSet) {
+Connection::Connection(int portNoSendToSet, char* IPAddressToSet,
+		std::mutex *receiveThreadMutex, std::mutex *bufferFileMutex) {
 	portNoSend = portNoSendToSet;
 	portNoReceive = (portNoSendToSet + 1);
 	IPAddress = IPAddressToSet;
@@ -73,6 +77,8 @@ Connection::Connection(int portNoSendToSet, char* IPAddressToSet) {
 	openBoolReceive = false;
 	openBoolSend = false;
 	flagToReceiveThread = false;
+	flagToReceiveThreadMutex = receiveThreadMutex;
+	mutexForBufferFile = bufferFileMutex;
 	openConnection();
 	checkState();
 }
@@ -106,7 +112,7 @@ Connection::Connection(int portNoSendToSet, char* IPAddressToSet) {
 int Connection::openConnection() {
 	if (!(isOpen())) {//Only if we are not fully connected should we try to open any new connections.
 
-		int rvReceive,rvSend;
+		int rvReceive, rvSend;
 
 		if (!openBoolReceive)//Only if the receive TCP connection is not open should we attempt to open it
 			rvReceive = openReceive(); //Open the receive TCP connection. openReceive must be called first to accept incoming connections.
@@ -143,7 +149,7 @@ int Connection::openConnection() {
  */
 int Connection::closeConnection() {
 
-	int rvReceive,rvSend;
+	int rvReceive, rvSend;
 
 	if (openBoolReceive)//Only if the receive connection is currently open should we attempt to close it
 		rvReceive = closeReceive();
@@ -353,8 +359,8 @@ int Connection::openReceive() {
 
 		//Fork off a new process to handle the newly accepted connection
 		receiveThread = std::thread(receiveThreadFunction,
-				&flagToReceiveThread, sockfdReceive, &flagToReceiveThreadMutex,
-				&mutexForBufferFile, IPAddress);
+				&flagToReceiveThread, sockfdReceive, flagToReceiveThreadMutex,
+				mutexForBufferFile, IPAddress);
 
 	}
 
@@ -387,10 +393,16 @@ void receiveThreadFunction(bool *flagToReceiveThread, int sockfdReceive,
 		(*flagToReceiveThreadMutex).unlock();//Unlock the flagToReceiveThreadMutex to allow others to use it
 
 		int numBytesRecieved;//This will hold the number of bytes successfully received through the socket (up to the maximum message size in bytes)
-		char buffer[999999];//This is a buffer to hold the incoming message//TODO: put real value as max data size
+		char buffer[((constants::MAX_MESSAGE_SIZE + (2 * constants::VID_SIZE))
+				+ 1)];//This is a buffer to hold the incoming message
 
 		//Try to pull no more than the maximum message size in bytes through the socket into the buffer to grab the message
-		if ((numBytesRecieved = recv(sockfdReceive, buffer, 999999, 0)) == -1) {//If it fails...//TODO: put real value as max data size
+		if ((numBytesRecieved
+				= recv(
+						sockfdReceive,
+						buffer,
+						((constants::MAX_MESSAGE_SIZE + (2
+								* constants::VID_SIZE)) + 1), 0)) == -1) {//If it fails...
 			perror("receiveThreadFunction: recv()");
 			close(sockfdReceive);//This child process is done, so we don't need this anymore
 			exit(1);
@@ -427,9 +439,9 @@ int Connection::closeSend() {
  */
 int Connection::closeReceive() {
 	if (openBoolReceive) { //No need to try to close the receive connection if it's not open
-		flagToReceiveThreadMutex.lock();//Make sure to lock the flagToReceiveThreadMutex to ensure others will see our changes to flagToReceiveThread
+		flagToReceiveThreadMutex->lock();//Make sure to lock the flagToReceiveThreadMutex to ensure others will see our changes to flagToReceiveThread
 		flagToReceiveThread = true;//Set the flagToReceiveThread boolean to tell the receive thread to clean up and stop execution
-		flagToReceiveThreadMutex.unlock();//Unlock the flagToReceiveThreadMutex so others can view the new value of the flagToReceiveThread boolean
+		flagToReceiveThreadMutex->unlock();//Unlock the flagToReceiveThreadMutex so others can view the new value of the flagToReceiveThread boolean
 		receiveThread.join();//Wait for the receiveThread to finish cleaning up and stop execution
 		openBoolReceive = false; //Indicate the receive connection has been closed
 		openBool = false;//Indicate the Connection is no longer fully open
@@ -458,91 +470,110 @@ void Connection::checkState() {
  *
  * Returns 0 if message is sent sucessfully, 1 otherwise.
  *
- * This function waiting on issue #41
  */
-//int Connection::send(Message toSend) {
-//
-//	if (!openBoolSend) {//Check to make sure the connection is open
-//		perror("Connection::send: send connection not connected!");
-//		return 1;
-//	}
-//
-//	int messageSizeInBytes = toSend.size();//Grab message size in bytes
-//
-//	if (send(sockfdSend, toSend, messageSizeInBytes, 0) == -1) {//If it fails...
-//
-//		if (errno == 105) {//If the TCP buffer is full...
-//
-//			sleep(5);//Wait 5 seconds
-//
-//			//Try again
-//			if (send(sockfdSend, toSend, messageSizeInBytes, 0) == -1) { //if it fails again..
-//				perror("Connection::send: send failed! Buffer full.");
-//				return 1;
-//			}
-//
-//		} else { //Something else happened
-//			perror("Connection::send: send failed!");
-//			return 1;
-//		}
-//
-//	}
-//
-//	return 0;//Indicate a successful send
-//
-//}
+int Connection::sendMessage(Message toSend) {
 
-//This function waiting on resolution of issue #42
-//Message Connection::receive() {
-//	std::fstream bufferFileStream;
-//	mutexForBufferFile.lock();//Make sure to lock the mutexForBufferFile so others can't write to it while we're looking at it
-//	bufferFileStream.open(IPAddress, std::ios::in | std::ios::out);//Open the file with the filename = IPAddress (the IP address of the connection). If it does not exist yet, create it.
-//
-//	char buffer[9999];//TODO: put real value for max message size
-//
-//	char x;
-//	bufferFileStream >> x;
-//	int i = 0;
-//
-//	while (!((x == EOF) || (x == '\0'))) {
-//		buffer[i] = x;
-//		i++;
-//		bufferFileStream >> x;
-//	}
-//
-//	//Need to have a way to convert filled buffer to message
-//
-//	int endOfMessage = bufferFileStream.tellg();
-//
-//	bufferFileStream.seekg(0, bufferFileStream.end);
-//	int lengthOfFile = bufferFileStream.tellg();
-//	int lengthOfRemaining = lengthOfFile - endOfMessage;
-//
-//	char remainingBuffer[lengthOfRemaining];
-//
-//	bufferFileStream.seekg(lengthOfFile);
-//
-//	char y;
-//	bufferFileStream >> y;
-//	int j = 0;
-//
-//	while (!(j == EOF)) {
-//		remainingBuffer[j] = y;
-//		j++;
-//		bufferFileStream >> y;
-//	}
-//
-//	bufferFileStream.close();//Close the file so we can open it again in truncuate (over -write) mode
-//	bufferFileStream.open(IPAddress, std::ios::out | std::ios::trunc);//Open the file with the filename = IPAddress (the IP address of the connection) in overwrite mode
-//
-//	for (j = 0; j < lengthOfRemaining; j++)
-//		remainingBuffer[j] >> bufferFileStream;
-//
-//	bufferFileStream.close(); //Close the file so others can use it
-//
-//	mutexForBufferFile.unlock();//Unlock the mutexForBufferFile so that others know the file is availible
-//
-//	return message;
-//}
+	if (!openBoolSend) {//Check to make sure the connection is open
+		perror("Connection::send: send connection not connected!");
+		return 1;
+	}
 
+	int messageSizeInBytes = toSend.getMessageSize();//Grab message size in bytes
+
+	//Copy the message into an unsigned character array to send
+	unsigned char sendBuff[messageSizeInBytes];
+	memcpy(sendBuff, &toSend, messageSizeInBytes);
+
+	if (send(sockfdSend, sendBuff, messageSizeInBytes, 0) == -1) {//If it fails...
+
+		if (errno == 105) {//If the TCP buffer is full...
+
+			sleep(5);//Wait 5 seconds
+
+			//Try again
+			if (send(sockfdSend, sendBuff, messageSizeInBytes, 0) == -1) { //if it fails again..
+				perror("Connection::send: send failed! Buffer full.");
+				return 1;
+			}
+
+		} else { //Something else happened
+			perror("Connection::send: send failed!");
+			return 1;
+		}
+
+	}
+
+	return 0;//Indicate a successful send
+
+}
+
+//TODO: Needs header, comments
+Message Connection::receiveMessage() {
+	std::fstream bufferFileStream;
+	mutexForBufferFile->lock();//Make sure to lock the mutexForBufferFile so others can't write to it while we're looking at it
+	bufferFileStream.open(IPAddress, std::ios::in | std::ios::out);//Open the file with the filename = IPAddress (the IP address of the connection). If it does not exist yet, create it.
+
+	//Create some buffers to hold the data
+	unsigned char source[constants::VID_SIZE];//This will hold the source VID
+	unsigned char dest[constants::VID_SIZE];//This will hold the destination VID
+	bool flag;//This will hold the broadcast flag
+	char m[constants::MAX_MESSAGE_SIZE];//This will hold the message's content
+
+	//Grab the first byte from the file
+	unsigned char x;
+	bufferFileStream >> x;
+	int i = 0;
+
+	while (!((x == EOF) || (x == '\0'))) {//While there are still bytes to be read from the file, and we do not encounter a  '\0' (used to deliniate the messages in the file)...
+
+		if (i < constants::VID_SIZE)
+			source[i] = x;//Put this byte in the source
+		else if (i < (2 * constants::VID_SIZE))
+			dest[i] = x;//Put this byte in the destination
+		else if (i == (2 * constants::VID_SIZE))
+			flag = (x != 0);//This byte is the broadcast flag
+		else
+			m[i] = x;//Put this byte in the message's content
+
+		i++;
+		bufferFileStream >> x;
+	}
+
+	Message toReturn = Message(source, dest, flag, m);//Use the now filled buffers to create a message
+
+	//Find the length of the buffer file
+	int endOfMessage = bufferFileStream.tellg();
+	bufferFileStream.seekg(0, bufferFileStream.end);
+	int lengthOfFile = bufferFileStream.tellg();
+
+	//Find the length of the file after the first message (now read into "toReturn")
+	int lengthOfRemaining = lengthOfFile - endOfMessage;
+
+	//Grab the file's contents *after* the message we've already read in
+	unsigned char remainingBuffer[lengthOfRemaining];
+
+	bufferFileStream.seekg(lengthOfFile);
+
+	char y;
+	bufferFileStream >> y;
+	int j = 0;
+
+	while (!(j == EOF)) {
+		remainingBuffer[j] = y;
+		j++;
+		bufferFileStream >> y;
+	}
+
+	bufferFileStream.close();//Close the file so we can open it again in truncuate (over -write) mode
+	bufferFileStream.open(IPAddress, std::ios::out | std::ios::trunc);//Open the file with the filename = IPAddress (the IP address of the connection) in overwrite mode
+
+	for (j = 0; j < lengthOfRemaining; j++)
+		bufferFileStream << remainingBuffer[j];//Write only the contents of the file *after* the message we converted to overwrite the message we converted
+
+	bufferFileStream.close(); //Close the file so others can use it
+
+	mutexForBufferFile->unlock();//Unlock the mutexForBufferFile so that others know the file is availible
+
+	return toReturn;//Return the newly created message
+}
 

@@ -8,7 +8,6 @@
  * buffers all input to a file named by the IP address of the
  * connection.
  *
- *	Note: Currently waiting on issue #41, issue #42
  *
  *  Created on: Feb 15, 2014
  *      Author: Paula Rudy (paular@wpi.edu)

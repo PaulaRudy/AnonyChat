@@ -1,6 +1,8 @@
 /*
  * Contact.h
  *
+ *	TODO: Needs comments/headers
+ *
  *  Created on: Feb 13, 2014
  *      Author: sam
  */

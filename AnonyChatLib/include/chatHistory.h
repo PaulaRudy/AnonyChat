@@ -1,6 +1,8 @@
 /*
  * chatHistory.h
  *
+ *	TODO: Needs comments/headers
+ *
  *  Created on: Feb 15, 2014
  *      Author: Sam Lalezari
  */

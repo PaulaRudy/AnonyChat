@@ -222,6 +222,7 @@ int RoutingTable::fillAndSortListOfRoutesForVirtualAddress(long long unsigned vi
 
 }
 
+//TODO: Add a function header here
 int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
 	Connection *sendConnection;
 	std::multimap<long long unsigned, NeighborUtilCountPair>::iterator it;
@@ -266,17 +267,18 @@ int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
 			// if the neighborIP is our source neighbor skip this one
 			if (neighborIP == srcNeighborIP) continue;
 
-			// set up the connection to this neighbor
-			sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
-
-			// open a send connection
-			retval = sendConnection->openSend();
-
-			// if the connection was successfully opened send the message
-			if (retval) sendConnection->send(toSend);
-
-			// close the connection
-			sendConnection->closeConnection();
+			//TODO: fix this (need to add connection reference to neighbor list first)
+//			// set up the connection to this neighbor
+//			sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
+//
+//			// open a send connection
+//			retval = sendConnection->openSend();
+//
+//			// if the connection was successfully opened send the message
+//			if (retval) sendConnection->send(toSend);
+//
+//			// close the connection
+//			sendConnection->closeConnection();
 
 		} // go to the next neighbor in the list
 
@@ -286,42 +288,43 @@ int RoutingTable::RouteMessage(Message toSend, char* srcNeighborIP) {
 		// sort the list of neighbors and utility counters for this virtual address
 		this->fillAndSortListOfRoutesForVirtualAddress(toSend.getVID(false), &neighborList);
 
-		// once we have the sorted neighbor list we open a connection to the first neighbor IP
-		neighborIP = neighborList.front().IPAddress;
-
-		// now that we know the IP address of the neighbor we're sending to
-		// we can set up a connection with that neighbor
-		sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
-
-		// now that the connection is ready, we want to open a send connection
-		retval = sendConnection->openSend();
-
-		// as long as we haven't successfully opened a connection
-		while (!!retval) {
-
-			// we want to remove the unsuccessful connection from the list and table
-			RemoveTableEntry(toSend.getVID(false), neighborList.front());
-			neighborList.remove(neighborList.front());
-
-			// if the neighbor list is now empty then we failed to find any working neighbors
-			if (neighborList.empty()) return 1;
-
-			// otherwise we need the new optimal neighbor
-			neighborIP = neighborList.front().IPAddress;
-
-			// we want to set up a connection again
-			sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
-
-			// we then want to attempt to open a connection to the next front
-			retval = sendConnection->openSend();
-
-		} // once we have successfully opened a connection to a neighbor
-
-		// we want to actually send the message
-		sendConnection->send(toSend);
-
-		// then we want to close the connection and return
-		sendConnection->closeConnection();
+		//TODO: fix this (need to add connection reference to neighbor list first)
+//		// once we have the sorted neighbor list we open a connection to the first neighbor IP
+//		neighborIP = neighborList.front().IPAddress;
+//
+//		// now that we know the IP address of the neighbor we're sending to
+//		// we can set up a connection with that neighbor
+//		sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
+//
+//		// now that the connection is ready, we want to open a send connection
+//		retval = sendConnection->openSend();
+//
+//		// as long as we haven't successfully opened a connection
+//		while (!!retval) {
+//
+//			// we want to remove the unsuccessful connection from the list and table
+//			RemoveTableEntry(toSend.getVID(false), neighborList.front());
+//			neighborList.remove(neighborList.front());
+//
+//			// if the neighbor list is now empty then we failed to find any working neighbors
+//			if (neighborList.empty()) return 1;
+//
+//			// otherwise we need the new optimal neighbor
+//			neighborIP = neighborList.front().IPAddress;
+//
+//			// we want to set up a connection again
+//			sendConnection = new Connection(MESSAGEPORT, (char *) &neighborIP);
+//
+//			// we then want to attempt to open a connection to the next front
+//			retval = sendConnection->openSend();
+//
+//		} // once we have successfully opened a connection to a neighbor
+//
+//		// we want to actually send the message
+//		sendConnection->send(toSend);
+//
+//		// then we want to close the connection and return
+//		sendConnection->closeConnection();
 	}
 
 	return 0;//Indicate success

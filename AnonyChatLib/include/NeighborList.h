@@ -29,7 +29,7 @@ int UserTrustLevel;
 
 class NeighborList {
 public:
-	std::vector<std::string> list; //The actual list of neighbors
+	std::vector<std::string> list; //The actual list of neighbors //TODO: add a reference to connections for each neighbor
 	NeighborList();//Constructor. See NeighborList.cpp for more details.
 	~NeighborList();//Destructor. See NeighborList.cpp for more details.
 	void ReadNeighborList(char *); //takes a filename and populates the neighbor list from the file specified

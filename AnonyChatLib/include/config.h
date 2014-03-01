@@ -1,6 +1,8 @@
 /*
  * config.h
  *
+ * TODO: Needs comments/headers. Should look through other headers and put stuff here.
+ *
  *  Created on: Feb 16, 2014
  *      Author: Sam Lalezari
  */

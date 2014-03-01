@@ -1,7 +1,7 @@
 /**
  * RoutingTable.h
  *
- * header file for the routing table and its associated functions provides the interface into the
+ * Header file for the routing table and its associated functions provides the interface into the
  * functions for the routing table class used to build, maintian, and utilize the routing table
  * includes the routeMessage function that will determine where a message should be sent
  *

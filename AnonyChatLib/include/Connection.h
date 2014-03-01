@@ -1,7 +1,15 @@
 /*
  * Connection.h
  *
- * Header for the Connection.cpp file
+ * Header for the Connection class. See Connection.cpp for more details.
+ *
+ * The Connection class is used to create, mantain, and use a TCP
+ * connection to a neighbor. Two separate TCP connections are maintained:
+ * one devoted to sending messages, one devoted to receiving.
+ *
+ * The receiving TCP connection is managed by a thread that
+ * buffers all input to a file named by the IP address of the
+ * connection.
  *
  *  Created on: Feb 15, 2014
  *      Author: Paula Rudy (paular@wpi.edu)

@@ -30,7 +30,7 @@ public:
 	Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE], char flag, char m[constants::MAX_MESSAGE_SIZE]);
 	Message(char m[constants::MAX_MESSAGE_SIZE]){memcpy(message, m, constants::MAX_MESSAGE_SIZE);};
 	size_t getMessageSize();
-	unsigned char* getVID(bool);
+	long long unsigned getVID(bool);
 	int getUCounters();
 	void setUCounters(int);
 	void setTime(time_t t){sendTime = t;};

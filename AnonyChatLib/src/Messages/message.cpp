@@ -32,9 +32,9 @@ size_t Message::getMessageSize(){
  * @return The source or destination virtual address as indicated by the bool argument
  * true for source false for dest
  */
-unsigned char* Message::getVID(bool wantSource) {
-	if (wantSource)	return sourceVID;
-	else return destVID;
+long long unsigned Message::getVID(bool wantSource) {
+	if (wantSource)	return (long long unsigned)sourceVID;
+	else return (long long unsigned)destVID;
 }
 
 /**

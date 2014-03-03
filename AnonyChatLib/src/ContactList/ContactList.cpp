@@ -182,10 +182,10 @@ void ContactList::update(Message m){
 			}
 		}
 	} else { // Else create a new contact with new chat log
-		Contact c = Contact(m.getVID(true), (const char*)m.getVID(true)); // new contact where the name is just the VID
+		// c = Contact(m.getVID(true), (const char*)m.getVID(true)); // new contact where the name is just the VID
 		HistoryLog log; // A new history log for the contact
-		log.addEntry(HistoryEntry(m.getVID(true), m.getMessage())); //Add a new history log entry with the message
-		c.setChatLog(log); // set the chat log for the contact
+		//log.addEntry(HistoryEntry(m.getVID(true), m.getMessage())); //Add a new history log entry with the message
+		//c.setChatLog(log); // set the chat log for the contact
 	}
 }
 
@@ -197,6 +197,6 @@ void ContactList::update(Message m){
  */
 void Contact::updateChatLog(Message m){
 	HistoryLog log = this->getChatLog();
-	log.addEntry(HistoryEntry(m.getVID(true), m.getMessage()));
+	//log.addEntry(HistoryEntry(m.getVID(true), m.getMessage()));
 	this->setChatLog(log);
 }

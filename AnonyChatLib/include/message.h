@@ -17,15 +17,16 @@
 
 class Message {
 private:
+	char messageFlag;
+	long long messageSize;
 	unsigned char sourceVID[constants::VID_SIZE];
 	unsigned char destVID[constants::VID_SIZE];
 	int utilityCounter;
-	bool broadcastFlag;
 	time_t sendTime;
 	char message[constants::MAX_MESSAGE_SIZE];
 
 public:
-	Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE], bool flag, char m[constants::MAX_MESSAGE_SIZE]);
+	Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE], char flag, char m[constants::MAX_MESSAGE_SIZE]);
 	Message(char m[constants::MAX_MESSAGE_SIZE]){memcpy(message, m, constants::MAX_MESSAGE_SIZE);};
 	size_t getMessageSize();
 	long long unsigned getVID(bool);

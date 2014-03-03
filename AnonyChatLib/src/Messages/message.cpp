@@ -9,26 +9,23 @@
 #include "../../include/message.h"
 
 Message::Message(unsigned char source[constants::VID_SIZE], unsigned char dest[constants::VID_SIZE],
-		bool flag, char m[constants::MAX_MESSAGE_SIZE]){
+		char flag, char m[constants::MAX_MESSAGE_SIZE]){
 
 	memcpy(sourceVID, source, constants::VID_SIZE);
 	memcpy(destVID, dest, constants::VID_SIZE);
-	broadcastFlag = flag;
+	messageFlag = flag;
 	memcpy(message, m, constants::VID_SIZE);
 	sendTime = 0;
 	utilityCounter = 0;
+	messageSize += sizeof(messageFlag) + sizeof(messageSize) + sizeof(sourceVID) + sizeof(destVID) + sizeof(utilityCounter) + sizeof(sendTime);
+	messageSize += strlen(message);
 }
 
 /**
  * @return The size of the message, including all of the headers.
  */
 size_t Message::getMessageSize(){
-	size_t size = 0;
-
-	size += sizeof(sourceVID) + sizeof(destVID) + sizeof(utilityCounter) + sizeof(sendTime) + sizeof(broadcastFlag);
-	size += strlen(message);
-
-	return size;
+		return messageSize;
 }
 
 /**

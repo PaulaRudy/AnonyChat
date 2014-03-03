@@ -78,23 +78,12 @@ public:
 
 };
 //The function executed by the receive thread. (see Connection.cpp for more details)
-void receiveThreadFunction(bool *flagToReceiveThread,int sockfdReceive, std::mutex *flagToReceiveThreadMutex, std::mutex *mutexForBufferFile, char* IPAddress);
+void receiveThreadFunction(bool *flagToReceiveThread,int &sockfdReceive, std::mutex *flagToReceiveThreadMutex, std::mutex *mutexForBufferFile, char* IPAddress);
 
 //Helper function: grabs the address stored in the sockaddr pointed to by sa, IPv4 *or* IPv6
-void *getAddrFromSockaddr(struct sockaddr *sa)
-{
-	//If the sockaddr is IPv4...
-	if (sa->sa_family == AF_INET)
-		return &(((struct sockaddr_in*)sa)->sin_addr);//return the IP address stored in the sin_addr of sa
-
-	//The sockaddr must be IPv6
-	return &(((struct sockaddr_in6*)sa)->sin6_addr);//return the IP address stored in the sin6_addr of sa
-}
+void *getAddrFromSockaddr(struct sockaddr *sa);
 
 //Helper function: handler used to reap dead processes
-void sigchld_handler(int s)
-{
-	while(waitpid(-1, NULL, WNOHANG) > 0);
-}
+void sigchld_handler(int s);
 
 #endif /* CONNECTION_H_ */

@@ -175,8 +175,9 @@ int Connection::openSend() {
 	//Only if the send connection isn't open should you try to create and connect the send socket
 	if (!openBoolSend) {
 
-		char *port;//This will hold the port number to open the send connection from (set from the connection's portNoSend variable)
-		sprintf(port, "%d", portNoSend); //This is a work around to allow a dynamic port number. This sets port to the value in the connection's portNoSend variable.
+		char temp[4];
+		sprintf(temp, "%d", portNoSend); //This is a work around to allow a dynamic port number. This sets port to the value in the connection's portNoSend variable.
+		char *port = (char *) &temp;//This will hold the port number to open the send connection from (set from the connection's portNoSend variable)
 
 		struct addrinfo prepInfo;//Used to store information on the criteria for selecting the socket address structures returned in the listOfServerAddr.
 		struct addrinfo *listOfServerSocketAddr;//The list of appropriate socket address structures available
@@ -247,8 +248,10 @@ int Connection::openSend() {
 int Connection::openReceive() {
 	//Only if the receive connection isn't open should you try to create and connect the receive socket
 	if (!openBoolReceive) {
-		char *port;//This will hold the port number to listen to incoming connection requests from (set from the connection's portNoReceive variable + 1)
-		sprintf(port, "%d", (portNoReceive + 1)); //This is a work around to allow a dynamic port number. This sets port to the value in the connection's portNoReceive variable + 1.
+
+		char temp[4];
+		sprintf(temp, "%d", portNoReceive); //This is a work around to allow a dynamic port number. This sets port to the value in the connection's portNoReceive variable.
+		char *port = (char*) &temp;//This will hold the port number to listen to incoming connection requests from (set from the connection's portNoReceive variable)
 
 		struct addrinfo prepInfo;//Used to store information on the criteria for selecting the socket address structures returned in the listOfServerAddr.
 		struct addrinfo *listOfServerSocketAddr;//The list of appropriate socket address structures available
@@ -264,9 +267,10 @@ int Connection::openReceive() {
 		memset(&prepInfo, 0, sizeof prepInfo);
 		prepInfo.ai_family = AF_UNSPEC; // *either* IPv4 or IPv6
 		prepInfo.ai_socktype = SOCK_STREAM;//only use TCP
+		prepInfo.ai_flags = AI_PASSIVE; //Prepare for accepting incoming connections
 
 		//Set up the list of appropriate socket address structures available
-		if ((returnValueFromgetaddrinfo = getaddrinfo(IPAddress, port,
+		if ((returnValueFromgetaddrinfo = getaddrinfo(NULL, port,
 				&prepInfo, &listOfServerSocketAddr)) != 0) {//If it fails...
 			fprintf(stderr, "Connection::openReceive(): getaddrinfo: %s\n",
 					gai_strerror(returnValueFromgetaddrinfo));
@@ -382,7 +386,7 @@ int Connection::openReceive() {
  * The thread will print a message to stderr, close the socket, and exit with value 1 if it
  * encounters an error with the recv() function.
  */
-void receiveThreadFunction(bool *flagToReceiveThread, int sockfdReceive,
+void receiveThreadFunction(bool *flagToReceiveThread, int &sockfdReceive,
 		std::mutex *flagToReceiveThreadMutex, std::mutex *mutexForBufferFile,
 		char* IPAddress) {
 
@@ -577,3 +581,19 @@ Message Connection::receiveMessage() {
 	return toReturn;//Return the newly created message
 }
 
+//Helper function: grabs the address stored in the sockaddr pointed to by sa, IPv4 *or* IPv6
+void *getAddrFromSockaddr(struct sockaddr *sa)
+{
+	//If the sockaddr is IPv4...
+	if (sa->sa_family == AF_INET)
+		return &(((struct sockaddr_in*)sa)->sin_addr);//return the IP address stored in the sin_addr of sa
+
+	//The sockaddr must be IPv6
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);//return the IP address stored in the sin6_addr of sa
+}
+
+//Helper function: handler used to reap dead processes
+void sigchld_handler(int s)
+{
+	while(waitpid(-1, NULL, WNOHANG) > 0);
+}

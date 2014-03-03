@@ -32,9 +32,9 @@ size_t Message::getMessageSize(){
  * @return The source or destination virtual address as indicated by the bool argument
  * true for source false for dest
  */
-unsigned long long Message::getVID(bool wantSource) {
-	if (wantSource)	return (unsigned long long) sourceVID;
-	else return (unsigned long long) destVID;
+unsigned char* Message::getVID(bool wantSource) {
+	if (wantSource)	return sourceVID;
+	else return destVID;
 }
 
 /**
@@ -47,4 +47,45 @@ int Message::getUCounters() {
 void Message::setUCounters(int UCval) {
 	utilityCounter = UCval;
 	return;
+}
+
+/*
+ *  Sends the given message using the users routing table and given neighbor information.
+ */
+void sendMessage(Message m, char* neighborRecievedFrom){
+	time_t setTime;
+	time(&setTime);
+	m.setTime(setTime);
+
+//	getRoutingTable().RouteMessage(m, neighborRecievedFrom);
+}
+
+
+/**
+ * Opens the message, and updates the users contact list with it.
+ *
+ * @param m The message to open.
+ * @param l The contact list to update.
+ */
+void openMessage(Message m){
+	///getContactList().update(m); // Update the contact list with the message
+}
+
+void recieveMessage(Message m, char* neighborRecievedFrom){
+
+	/** Update the routing table entry for the source VID and the neighbor the message was recieved from */
+//	NeighborUtilCountPair neighborUtil = NeighborUtilCountPair(neighborRecievedFrom, m.getUCounters());
+//	getRoutingTable().UpdateTableEntry(m.getVID(true), neighborUtil);
+
+	/** Check to see if the message is destined for the user. If it is, then proceed to open the message */
+//	if(memcmp(m.getVID(false), getUserVID(), constants::VID_SIZE)){
+//		openMessage(m, getContactList());
+//	}
+
+	/** Message was not destined for user, so continue with forwarding it **/
+
+//	sendMessage(getRoutingTable(), m, neighborRecievedFrom);
+
+
+
 }

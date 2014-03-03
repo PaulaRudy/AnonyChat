@@ -149,3 +149,54 @@ ContactList readContactList(string path){
 }
 
 
+
+/**
+ * Checks to see if the contact list contains the given VID
+ *
+ * @param VID The virtual address to check for.
+ * @return True if the list contains VID, false otherwise.
+ */
+bool ContactList::containsVID(char* VID){
+	for(int i = 0; i < contact_list.size(); i++){
+		Contact c = contact_list.at(i);
+		if(memcmp(c.getAddr(), VID, constants::VID_SIZE)){
+			return true; // Found a VID match in the contact list, return true.
+		}
+	}
+	return false; // return false because the VID was not found in the list
+}
+
+/**
+ * Updates the contact list using the message to find the right contact
+ *
+ * @param m The message to update the contact list with.
+ */
+void ContactList::update(Message m){
+
+	/** Check to see if the contact list contains the message source VID **/
+	if(this->containsVID((char*)m.getVID(true))){ // If the contact list contains the VID
+		for(int i = 0; i<contact_list.size(); i++){
+			Contact c = contact_list.at(i);
+			if(memcmp(c.getAddr(), (char*)m.getVID(true), constants::VID_SIZE)){
+				c.updateChatLog(m);
+			}
+		}
+	} else { // Else create a new contact with new chat log
+		Contact c = Contact(m.getVID(true), (const char*)m.getVID(true)); // new contact where the name is just the VID
+		HistoryLog log; // A new history log for the contact
+		log.addEntry(HistoryEntry(m.getVID(true), m.getMessage())); //Add a new history log entry with the message
+		c.setChatLog(log); // set the chat log for the contact
+	}
+}
+
+
+/**
+ * Updates the chat log with the given message
+ *
+ * @param m The message to add to the log
+ */
+void Contact::updateChatLog(Message m){
+	HistoryLog log = this->getChatLog();
+	log.addEntry(HistoryEntry(m.getVID(true), m.getMessage()));
+	this->setChatLog(log);
+}

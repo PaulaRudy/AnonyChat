@@ -34,6 +34,7 @@ public:
 	string toString();
 	HistoryLog getChatLog(){return chatLog;};
 	void setChatLog(HistoryLog log){chatLog = log;};
+	void updateChatLog(Message m);
 };
 
 class ContactList{
@@ -45,6 +46,8 @@ public:
 	vector<Contact> getList(){return contact_list;};
 	string toString();
 	void write(ofstream& s);
+	bool containsVID(char* virtualAdd);
+	void update(Message m);
 };
 
 void printContact(Contact c);
